@@ -11,16 +11,7 @@ request.onerror = function(event) {
 request.onsuccess = function(event) {
     db = event.target.result;
     console.log("Base de datos abierta exitosamente");
-    if (document.getElementById('registros')) {
-        actualizarRegistros();
-        inicializarGrafico();
-    }
-    if (document.getElementById('listaClientes')) {
-        cargarClientes();
-    }
-    if (document.getElementById('codigoCliente')) {
-        cargarClientesEnSelect();
-    }
+    inicializarPagina();
 };
 
 request.onupgradeneeded = function(event) {
@@ -35,7 +26,6 @@ request.onupgradeneeded = function(event) {
         clientesStore.createIndex("codigo", "codigo", { unique: true });
     }
     
-    // Agregar el campo dirección a la tabla de clientes si no existe
     if (event.oldVersion < 4) {
         const clientesStore = event.currentTarget.transaction.objectStore("clientes");
         if (!clientesStore.indexNames.contains("direccion")) {
@@ -44,7 +34,23 @@ request.onupgradeneeded = function(event) {
     }
 };
 
-// Función para cargar clientes en el select
+function inicializarPagina() {
+    console.log("Inicializando página");
+    if (document.getElementById('registros')) {
+        console.log("Elemento 'registros' encontrado, actualizando registros");
+        actualizarRegistros();
+        inicializarGrafico();
+    } else {
+        console.log("Elemento 'registros' no encontrado en esta página");
+    }
+    if (document.getElementById('listaClientes')) {
+        cargarClientes();
+    }
+    if (document.getElementById('codigoCliente')) {
+        cargarClientesEnSelect();
+    }
+}
+
 function cargarClientesEnSelect() {
     const select = document.getElementById('codigoCliente');
     const transaction = db.transaction(["clientes"], "readonly");
@@ -63,7 +69,6 @@ function cargarClientesEnSelect() {
     };
 }
 
-// Función para agregar trabajo
 if (document.getElementById('trabajoForm')) {
     document.getElementById('trabajoForm').onsubmit = function(e) {
         e.preventDefault();
@@ -93,7 +98,6 @@ if (document.getElementById('trabajoForm')) {
     };
 }
 
-// Función para inicializar y actualizar el gráfico
 function inicializarGrafico() {
     const ctx = document.getElementById('graficoMensual').getContext('2d');
     graficoMensual = new Chart(ctx, {
@@ -166,8 +170,8 @@ function actualizarGrafico(mesSeleccionado) {
     };
 }
 
-// Función para actualizar la visualización de registros
 function actualizarRegistros() {
+    console.log("Iniciando actualización de registros");
     const trabajosTransaction = db.transaction(["trabajos", "clientes"], "readonly");
     const trabajosStore = trabajosTransaction.objectStore("trabajos");
     const clientesStore = trabajosTransaction.objectStore("clientes");
@@ -176,16 +180,51 @@ function actualizarRegistros() {
     
     trabajosRequest.onsuccess = function() {
         const trabajos = trabajosRequest.result;
+        console.log("Trabajos obtenidos:", trabajos);
+        
+        if (trabajos.length === 0) {
+            console.log("No hay trabajos para mostrar");
+            document.getElementById('registros').innerHTML = "<p>No hay trabajos registrados.</p>";
+            return;
+        }
         
         Promise.all(trabajos.map(t => {
             return new Promise((resolve) => {
-                const clienteRequest = clientesStore.index('codigo').get(t.codigoCliente);
-                clienteRequest.onsuccess = function() {
-                    const cliente = clienteRequest.result;
+                if (t.codigoCliente) {
+                    const clienteRequest = clientesStore.index('codigo').get(t.codigoCliente);
+                    clienteRequest.onsuccess = function() {
+                        const cliente = clienteRequest.result;
+                        resolve(`
+                            <tr>
+                                <td>${t.fecha}</td>
+                                <td>${cliente ? cliente.nombre : 'Cliente no encontrado'}</td>
+                                <td>${t.tipo}</td>
+                                <td>${t.descripcion}</td>
+                                <td>$${t.monto.toFixed(2)}</td>
+                                <td>$${t.viatico.toFixed(2)}</td>
+                                <td>$${t.estacionamiento.toFixed(2)}</td>
+                            </tr>
+                        `);
+                    };
+                    clienteRequest.onerror = function() {
+                        console.error("Error al obtener cliente:", t.codigoCliente);
+                        resolve(`
+                            <tr>
+                                <td>${t.fecha}</td>
+                                <td>Error al obtener cliente</td>
+                                <td>${t.tipo}</td>
+                                <td>${t.descripcion}</td>
+                                <td>$${t.monto.toFixed(2)}</td>
+                                <td>$${t.viatico.toFixed(2)}</td>
+                                <td>$${t.estacionamiento.toFixed(2)}</td>
+                            </tr>
+                        `);
+                    };
+                } else {
                     resolve(`
                         <tr>
                             <td>${t.fecha}</td>
-                            <td>${cliente ? cliente.nombre : 'Cliente no encontrado'}</td>
+                            <td>Cliente no especificado</td>
                             <td>${t.tipo}</td>
                             <td>${t.descripcion}</td>
                             <td>$${t.monto.toFixed(2)}</td>
@@ -193,29 +232,39 @@ function actualizarRegistros() {
                             <td>$${t.estacionamiento.toFixed(2)}</td>
                         </tr>
                     `);
-                };
+                }
             });
         })).then(filas => {
             const tablaHTML = `
                 <table>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Cliente</th>
-                        <th>Tipo</th>
-                        <th>Descripción</th>
-                        <th>Monto Trabajo</th>
-                        <th>Viático</th>
-                        <th>Estacionamiento</th>
-                    </tr>
-                    ${filas.join('')}
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Monto Trabajo</th>
+                            <th>Viático</th>
+                            <th>Estacionamiento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filas.join('')}
+                    </tbody>
                 </table>
             `;
+            console.log("Actualizando HTML de registros");
             document.getElementById('registros').innerHTML = tablaHTML;
+        }).catch(error => {
+            console.error("Error al generar la tabla de trabajos:", error);
         });
+    };
+    
+    trabajosRequest.onerror = function(event) {
+        console.error("Error al obtener trabajos:", event.target.error);
     };
 }
 
-// Funciones para gestionar clientes
 if (document.getElementById('clienteForm')) {
     document.getElementById('clienteForm').onsubmit = function(e) {
         e.preventDefault();
@@ -307,9 +356,11 @@ function eliminarCliente(id) {
     }
 }
 
-// Inicialización
 document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('codigoCliente')) {
-        cargarClientesEnSelect();
+    console.log("DOM cargado, inicializando aplicación");
+    if (db) {
+        inicializarPagina();
+    } else {
+        console.log("La base de datos aún no está lista, esperando...");
     }
 });
