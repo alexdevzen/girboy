@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Registro de Trabajos</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html" aria-current="page">Inicio</a></li>
+                <li><a href="pages/agregar-trabajo.html">Agregar Trabajo</a></li>
+                <li><a href="pages/gestionar-clientes.html">Gestionar Clientes</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Resumen de Trabajos</h1>
+        
+        <section id="grafico-section" aria-labelledby="grafico-titulo">
+            <h2 id="grafico-titulo">Gráfico Mensual</h2>
+            <div>
+                <label for="mesGrafico">Seleccione mes:</label>
+                <input type="month" id="mesGrafico">
+            </div>
+            <canvas id="graficoMensual" aria-label="Gráfico de trabajos mensuales" role="img"></canvas>
+        </section>
+
+        <section id="registros-section" aria-labelledby="registros-titulo">
+            <h2 id="registros-titulo">Registros de Trabajos</h2>
+            <div id="registros" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; <time datetime="2024">2024</time> Sistema de Registro de Trabajos</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

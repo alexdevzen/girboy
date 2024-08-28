@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Clientes - Sistema de Registro de Trabajos</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Inicio</a></li>
+                <li><a href="agregar-trabajo.html">Agregar Trabajo</a></li>
+                <li><a href="gestionar-clientes.html" aria-current="page">Gestionar Clientes</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Gestionar Clientes</h1>
+        
+        <section aria-labelledby="agregar-editar-cliente-titulo">
+            <h2 id="agregar-editar-cliente-titulo">Agregar o Editar Cliente</h2>
+            <form id="clienteForm" aria-labelledby="agregar-editar-cliente-titulo">
+                <input type="hidden" id="clienteId">
+                <div>
+                    <label for="codigoCliente">Código:</label>
+                    <input type="text" id="codigoCliente" required>
+                </div>
+                <div>
+                    <label for="nombreCliente">Nombre del Cliente:</label>
+                    <input type="text" id="nombreCliente" required>
+                </div>
+                <div>
+                    <label for="direccionCliente">Dirección:</label>
+                    <input type="text" id="direccionCliente" required>
+                </div>
+                <div>
+                    <label for="ciudadCliente">Ciudad:</label>
+                    <input type="text" id="ciudadCliente" required>
+                </div>
+                <button type="submit">Guardar Cliente</button>
+            </form>
+        </section>
+
+        <section aria-labelledby="lista-clientes-titulo">
+            <h2 id="lista-clientes-titulo">Lista de Clientes</h2>
+            <div id="listaClientes" role="list" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; <time datetime="2024">2024</time> Sistema de Registro de Trabajos</p>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+</html>

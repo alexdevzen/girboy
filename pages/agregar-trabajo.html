@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Trabajo - Sistema de Registro de Trabajos</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Inicio</a></li>
+                <li><a href="agregar-trabajo.html" aria-current="page">Agregar Trabajo</a></li>
+                <li><a href="gestionar-clientes.html">Gestionar Clientes</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Agregar Nuevo Trabajo</h1>
+        
+        <form id="trabajoForm" aria-labelledby="form-titulo">
+            <h2 id="form-titulo">Detalles del Trabajo</h2>
+            <div>
+                <label for="fechaTrabajo">Fecha:</label>
+                <input type="date" id="fechaTrabajo" required>
+            </div>
+            <div>
+                <label for="codigoCliente">Código Cliente:</label>
+                <select id="codigoCliente" required>
+                    <option value="">Seleccione un cliente</option>
+                </select>
+            </div>
+            <div>
+                <label for="tipoTrabajo">Tipo de Trabajo:</label>
+                <select id="tipoTrabajo">
+                    <option value="Mantencion">Mantención</option>
+                    <option value="Incidencia">Incidencia</option>
+                </select>
+            </div>
+            <div>
+                <label for="descripcionTrabajo">Descripción:</label>
+                <input type="text" id="descripcionTrabajo" required>
+            </div>
+            <div>
+                <label for="montoTrabajo">Monto del Trabajo:</label>
+                <input type="number" id="montoTrabajo" required>
+            </div>
+            <div>
+                <label for="montoViatico">Monto del Viático:</label>
+                <input type="number" id="montoViatico">
+            </div>
+            <div>
+                <label for="montoEstacionamiento">Monto del Estacionamiento:</label>
+                <input type="number" id="montoEstacionamiento">
+            </div>
+            <button type="submit">Agregar Trabajo</button>
+        </form>
+    </main>
+
+    <footer>
+        <p>&copy; <time datetime="2024">2024</time> Sistema de Registro de Trabajos</p>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+</html>
