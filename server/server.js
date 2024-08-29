@@ -69,6 +69,20 @@ app.post('/api/trabajos', async (req, res) => {
     }
 });
 
+// Eliminar clientes
+app.delete('/api/clientes/:id', async (req, res) => {
+    try {
+        const database = client.db('tu_base_de_datos');
+        const clientes = database.collection('clientes');
+        const id = req.params.id;
+        const resultado = await clientes.deleteOne({ _id: new ObjectId(id) });
+        res.json(resultado);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
 });
