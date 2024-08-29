@@ -1,42 +1,26 @@
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM cargado, inicializando aplicación");
-    inicializarDB().then(() => {
-        inicializarPagina();
-    }).catch(error => {
-        console.error("Error al inicializar la base de datos:", error);
-    });
+document.addEventListener('DOMContentLoaded', function () {
+    // Cargar gráfico de ganancias
+    cargarGraficoGanancias();
+
+    // Cargar lista de trabajos
+    cargarListaTrabajos();
 });
 
-function inicializarPagina() {
-    if (document.getElementById('registros')) {
-        actualizarRegistros();
-    }
-    if (document.getElementById('graficoMensual')) {
-        inicializarGrafico();
-    }
-    if (document.getElementById('listaClientes')) {
-        actualizarListaClientes();
-    }
-    if (document.getElementById('codigoCliente')) {
-        cargarClientesEnSelect();
-    }
-}
-
-function inicializarGrafico() {
-    const ctx = document.getElementById('graficoMensual').getContext('2d');
-    const graficoMensual = new Chart(ctx, {
-        type: 'bar',
+function cargarGraficoGanancias() {
+    const ctx = document.getElementById('graficoGanancias').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
         data: {
-            labels: [],
+            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
             datasets: [{
-                label: 'Monto Total',
-                data: [],
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
+                label: 'Ganancias Mensuales',
+                data: [4000, 3000, 5000, 4500, 6000, 5500],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
             }]
         },
         options: {
+            responsive: true,
             scales: {
                 y: {
                     beginAtZero: true
@@ -44,42 +28,28 @@ function inicializarGrafico() {
             }
         }
     });
-
-    const mesGraficoInput = document.getElementById('mesGrafico');
-    const fechaActual = new Date();
-    mesGraficoInput.value = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth() + 1).padStart(2, '0')}`;
-    
-    actualizarGrafico(mesGraficoInput.value, graficoMensual);
-
-    mesGraficoInput.addEventListener('change', function() {
-        actualizarGrafico(this.value, graficoMensual);
-    });
 }
 
-function actualizarGrafico(mesSeleccionado, graficoMensual) {
-    const [año, mes] = mesSeleccionado.split('-');
-    const primerDiaMes = new Date(año, mes - 1, 1);
-    const ultimoDiaMes = new Date(año, mes, 0);
+function cargarListaTrabajos() {
+    // Aquí deberías hacer una llamada a tu API para obtener los trabajos
+    // Por ahora, usaremos datos de ejemplo
+    const trabajos = [
+        { id: 1, nombre: 'Diseño de logo', cliente: 'Empresa A', fecha: '2024-08-15' },
+        { id: 2, nombre: 'Desarrollo web', cliente: 'Empresa B', fecha: '2024-08-20' },
+        { id: 3, nombre: 'SEO', cliente: 'Empresa C', fecha: '2024-08-25' }
+    ];
 
-    obtenerTrabajosPorRangoFecha(primerDiaMes, ultimoDiaMes).then(trabajos => {
-        const datosGrafico = {};
+    const tbody = document.getElementById('cuerpoTablaTrabajosListado');
+    tbody.innerHTML = '';
 
-        trabajos.forEach(trabajo => {
-            const fecha = trabajo.fecha;
-            const montoTotal = trabajo.monto + trabajo.viatico + trabajo.estacionamiento;
-
-            if (datosGrafico[fecha]) {
-                datosGrafico[fecha] += montoTotal;
-            } else {
-                datosGrafico[fecha] = montoTotal;
-            }
-        });
-
-        const fechas = Object.keys(datosGrafico).sort();
-        const montos = fechas.map(fecha => datosGrafico[fecha]);
-
-        graficoMensual.data.labels = fechas;
-        graficoMensual.data.datasets[0].data = montos;
-        graficoMensual.update();
+    trabajos.forEach(trabajo => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${trabajo.id}</td>
+            <td>${trabajo.nombre}</td>
+            <td>${trabajo.cliente}</td>
+            <td>${trabajo.fecha}</td>
+        `;
+        tbody.appendChild(tr);
     });
 }

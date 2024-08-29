@@ -4,9 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Agregar Trabajos</title>
     <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -20,14 +19,19 @@
         </nav>
     </header>
     <main>
-        <h1>Dashboard</h1>
-        <section id="ganancias">
-            <h2>Ganancias Mensuales</h2>
-            <canvas id="graficoGanancias"></canvas>
+        <h1>Agregar Trabajos</h1>
+        <section id="agregarTrabajo">
+            <h2>Nuevo Trabajo</h2>
+            <form id="formularioTrabajo">
+                <input type="text" id="nombre" name="nombre" placeholder="Nombre del trabajo" required>
+                <input type="text" id="cliente" name="cliente" placeholder="Cliente" required>
+                <input type="date" id="fecha" name="fecha" required>
+                <button type="submit">Agregar Trabajo</button>
+            </form>
         </section>
-        <section id="trabajos">
+        <section id="listaTrabajos">
             <h2>Lista de Trabajos</h2>
-            <table id="tablaTrabajosListado">
+            <table id="tablaTrabajos">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -36,13 +40,13 @@
                         <th>Fecha</th>
                     </tr>
                 </thead>
-                <tbody id="cuerpoTablaTrabajosListado">
+                <tbody id="cuerpoTablaTrabajos">
                     <!-- Los trabajos se cargarán aquí dinámicamente -->
                 </tbody>
             </table>
         </section>
     </main>
-    <script src="js/main.js"></script>
+    <script src="js/agregar-trabajos.js"></script>
 </body>
 
 </html>

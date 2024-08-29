@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Clientes</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="agregar-trabajos.html">Agregar Trabajos</a></li>
+                <li><a href="gestionar-clientes.html">Gestionar Clientes</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>Gestionar Clientes</h1>
+        <section id="agregarCliente">
+            <h2>Agregar Nuevo Cliente</h2>
+            <form id="formularioCliente">
+                <input type="text" id="codigo" name="codigo" placeholder="Código" required>
+                <input type="text" id="cliente" name="cliente" placeholder="Cliente" required>
+                <input type="text" id="direccion" name="direccion" placeholder="Dirección" required>
+                <input type="text" id="ciudad" name="ciudad" placeholder="Ciudad" required>
+                <button type="submit">Agregar Cliente</button>
+            </form>
+        </section>
+        <section id="listaClientes">
+            <h2>Lista de Clientes</h2>
+            <table id="tablaClientes">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Cliente</th>
+                        <th>Dirección</th>
+                        <th>Ciudad</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTablaClientes">
+                    <!-- Los clientes se cargarán aquí dinámicamente -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <script src="js/gestionar-clientes.js"></script>
+</body>
+
+</html>
