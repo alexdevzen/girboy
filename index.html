@@ -27,12 +27,31 @@
                 <label for="mesGrafico">Seleccione mes:</label>
                 <input type="month" id="mesGrafico">
             </div>
-            <canvas id="graficoMensual" aria-label="Gráfico de trabajos mensuales" role="img"></canvas>
+            <canvas id="graficoMensual"></canvas>
         </section>
 
         <section id="registros-section">
             <h2>Registros de Trabajos</h2>
-            <div id="registros"></div>
+            <div id="registros">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Código</th>
+                            <th>Cliente</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Monto Trabajo</th>
+                            <th>Viático</th>
+                            <th>Estacionamiento</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registros-body">
+                        <!-- Aquí se insertarán dinámicamente los registros -->
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 
@@ -40,6 +59,10 @@
         <p>&copy; <time datetime="2024">2024</time> Sistema de Registro de Trabajos</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="./js/database.js"></script>
+<script src="./js/trabajos.js"></script>
+<script src="./js/clientes.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/main.js"></script>
 </body>
 </html>

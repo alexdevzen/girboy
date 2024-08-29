@@ -35,19 +35,20 @@ request.onupgradeneeded = function(event) {
 };
 
 function inicializarPagina() {
-    console.log("Inicializando página");
     if (document.getElementById('registros')) {
-        console.log("Elemento 'registros' encontrado, actualizando registros");
         actualizarRegistros();
+    }
+    if (document.getElementById('graficoMensual')) {
         inicializarGrafico();
-    } else {
-        console.log("Elemento 'registros' no encontrado en esta página");
     }
     if (document.getElementById('listaClientes')) {
         cargarClientes();
     }
     if (document.getElementById('codigoCliente')) {
         cargarClientesEnSelect();
+    }
+    if (document.getElementById('trabajos-body')) {
+        actualizarTablaTrabajosEditable();
     }
 }
 
@@ -82,18 +83,28 @@ if (document.getElementById('trabajoForm')) {
             estacionamiento: parseFloat(document.getElementById('montoEstacionamiento').value) || 0
         };
 
+        const trabajoId = document.getElementById('trabajoId').value;
         const transaction = db.transaction(["trabajos"], "readwrite");
         const trabajosStore = transaction.objectStore("trabajos");
-        const request = trabajosStore.add(trabajo);
+
+        let request;
+        if (trabajoId) {
+            trabajo.id = parseInt(trabajoId);
+            request = trabajosStore.put(trabajo);
+        } else {
+            request = trabajosStore.add(trabajo);
+        }
 
         request.onsuccess = function() {
-            console.log("Trabajo agregado exitosamente");
-            e.target.reset();
-            alert("Trabajo agregado exitosamente");
+            console.log("Trabajo guardado exitosamente");
+            document.getElementById('trabajoForm').reset();
+            document.getElementById('trabajoId').value = '';
+            document.querySelector('#trabajoForm button[type="submit"]').textContent = 'Guardar Trabajo';
+            actualizarTablaTrabajosEditable();
         };
 
         request.onerror = function() {
-            console.error("Error al agregar trabajo", request.error);
+            console.error("Error al guardar trabajo", request.error);
         };
     };
 }
@@ -184,77 +195,36 @@ function actualizarRegistros() {
         
         if (trabajos.length === 0) {
             console.log("No hay trabajos para mostrar");
-            document.getElementById('registros').innerHTML = "<p>No hay trabajos registrados.</p>";
+            document.getElementById('registros-body').innerHTML = "<tr><td colspan='9'>No hay trabajos registrados.</td></tr>";
             return;
         }
         
         Promise.all(trabajos.map(t => {
             return new Promise((resolve) => {
-                if (t.codigoCliente) {
-                    const clienteRequest = clientesStore.index('codigo').get(t.codigoCliente);
-                    clienteRequest.onsuccess = function() {
-                        const cliente = clienteRequest.result;
-                        resolve(`
-                            <tr>
-                                <td>${t.fecha}</td>
-                                <td>${cliente ? cliente.nombre : 'Cliente no encontrado'}</td>
-                                <td>${t.tipo}</td>
-                                <td>${t.descripcion}</td>
-                                <td>$${t.monto.toFixed(2)}</td>
-                                <td>$${t.viatico.toFixed(2)}</td>
-                                <td>$${t.estacionamiento.toFixed(2)}</td>
-                            </tr>
-                        `);
-                    };
-                    clienteRequest.onerror = function() {
-                        console.error("Error al obtener cliente:", t.codigoCliente);
-                        resolve(`
-                            <tr>
-                                <td>${t.fecha}</td>
-                                <td>Error al obtener cliente</td>
-                                <td>${t.tipo}</td>
-                                <td>${t.descripcion}</td>
-                                <td>$${t.monto.toFixed(2)}</td>
-                                <td>$${t.viatico.toFixed(2)}</td>
-                                <td>$${t.estacionamiento.toFixed(2)}</td>
-                            </tr>
-                        `);
-                    };
-                } else {
+                const clienteRequest = clientesStore.index('codigo').get(t.codigoCliente);
+                clienteRequest.onsuccess = function() {
+                    const cliente = clienteRequest.result;
                     resolve(`
                         <tr>
                             <td>${t.fecha}</td>
-                            <td>Cliente no especificado</td>
+                            <td>${t.codigoCliente}</td>
+                            <td>${cliente ? cliente.nombre : 'Cliente no encontrado'}</td>
                             <td>${t.tipo}</td>
                             <td>${t.descripcion}</td>
                             <td>$${t.monto.toFixed(2)}</td>
                             <td>$${t.viatico.toFixed(2)}</td>
                             <td>$${t.estacionamiento.toFixed(2)}</td>
+                            <td>
+                                <button onclick="editarTrabajo(${t.id})">Editar</button>
+                                <button onclick="eliminarTrabajo(${t.id})">Eliminar</button>
+                            </td>
                         </tr>
                     `);
-                }
+                };
             });
         })).then(filas => {
-            const tablaHTML = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Cliente</th>
-                            <th>Tipo</th>
-                            <th>Descripción</th>
-                            <th>Monto Trabajo</th>
-                            <th>Viático</th>
-                            <th>Estacionamiento</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filas.join('')}
-                    </tbody>
-                </table>
-            `;
             console.log("Actualizando HTML de registros");
-            document.getElementById('registros').innerHTML = tablaHTML;
+            document.getElementById('registros-body').innerHTML = filas.join('');
         }).catch(error => {
             console.error("Error al generar la tabla de trabajos:", error);
         });
@@ -263,6 +233,89 @@ function actualizarRegistros() {
     trabajosRequest.onerror = function(event) {
         console.error("Error al obtener trabajos:", event.target.error);
     };
+}
+
+function actualizarTablaTrabajosEditable() {
+    const trabajosTransaction = db.transaction(["trabajos", "clientes"], "readonly");
+    const trabajosStore = trabajosTransaction.objectStore("trabajos");
+    const clientesStore = trabajosTransaction.objectStore("clientes");
+    
+    const trabajosRequest = trabajosStore.getAll();
+    
+    trabajosRequest.onsuccess = function() {
+        const trabajos = trabajosRequest.result;
+        
+        if (trabajos.length === 0) {
+            document.getElementById('trabajos-body').innerHTML = "<tr><td colspan='10'>No hay trabajos registrados.</td></tr>";
+            return;
+        }
+        
+        Promise.all(trabajos.map(t => {
+            return new Promise((resolve) => {
+                const clienteRequest = clientesStore.index('codigo').get(t.codigoCliente);
+                clienteRequest.onsuccess = function() {
+                    const cliente = clienteRequest.result;
+                    resolve(`
+                        <tr>
+                            <td>${t.fecha}</td>
+                            <td>${t.codigoCliente}</td>
+                            <td>${cliente ? cliente.nombre : 'Cliente no encontrado'}</td>
+                            <td>${t.tipo}</td>
+                            <td>${t.descripcion}</td>
+                            <td>$${t.monto.toFixed(2)}</td>
+                            <td>$${t.viatico.toFixed(2)}</td>
+                            <td>$${t.estacionamiento.toFixed(2)}</td>
+                            <td>
+                                <button onclick="editarTrabajo(${t.id})">Editar</button>
+                            </td>
+                            <td>
+                                <button onclick="eliminarTrabajo(${t.id})">Eliminar</button>
+                            </td>
+                        </tr>
+                    `);
+                };
+            });
+        })).then(filas => {
+            document.getElementById('trabajos-body').innerHTML = filas.join('');
+        });
+    };
+}
+
+function editarTrabajo(id) {
+    const transaction = db.transaction(["trabajos"], "readonly");
+    const trabajosStore = transaction.objectStore("trabajos");
+    const request = trabajosStore.get(id);
+
+    request.onsuccess = function() {
+        const trabajo = request.result;
+        document.getElementById('trabajoId').value = trabajo.id;
+        document.getElementById('fechaTrabajo').value = trabajo.fecha;
+        document.getElementById('codigoCliente').value = trabajo.codigoCliente;
+        document.getElementById('tipoTrabajo').value = trabajo.tipo;
+        document.getElementById('descripcionTrabajo').value = trabajo.descripcion;
+        document.getElementById('montoTrabajo').value = trabajo.monto;
+        document.getElementById('montoViatico').value = trabajo.viatico;
+        document.getElementById('montoEstacionamiento').value = trabajo.estacionamiento;
+        
+        document.querySelector('#trabajoForm button[type="submit"]').textContent = 'Actualizar Trabajo';
+    };
+}
+
+function eliminarTrabajo(id) {
+    if (confirm('¿Está seguro de que desea eliminar este trabajo?')) {
+        const transaction = db.transaction(["trabajos"], "readwrite");
+        const trabajosStore = transaction.objectStore("trabajos");
+        const request = trabajosStore.delete(id);
+
+        request.onsuccess = function() {
+            console.log("Trabajo eliminado exitosamente");
+            actualizarTablaTrabajosEditable();
+        };
+
+        request.onerror = function() {
+            console.error("Error al eliminar trabajo", request.error);
+        };
+    }
 }
 
 if (document.getElementById('clienteForm')) {
@@ -354,6 +407,52 @@ function eliminarCliente(id) {
             console.error("Error al eliminar cliente", request.error);
         };
     }
+}
+
+function actualizarTablaTrabajosEditable() {
+    const trabajosTransaction = db.transaction(["trabajos", "clientes"], "readonly");
+    const trabajosStore = trabajosTransaction.objectStore("trabajos");
+    const clientesStore = trabajosTransaction.objectStore("clientes");
+    
+    const trabajosRequest = trabajosStore.getAll();
+    
+    trabajosRequest.onsuccess = function() {
+        const trabajos = trabajosRequest.result;
+        
+        if (trabajos.length === 0) {
+            document.getElementById('trabajos-body').innerHTML = "<tr><td colspan='10'>No hay trabajos registrados.</td></tr>";
+            return;
+        }
+        
+        Promise.all(trabajos.map(t => {
+            return new Promise((resolve) => {
+                const clienteRequest = clientesStore.index('codigo').get(t.codigoCliente);
+                clienteRequest.onsuccess = function() {
+                    const cliente = clienteRequest.result;
+                    resolve(`
+                        <tr>
+                            <td>${t.fecha}</td>
+                            <td>${t.codigoCliente}</td>
+                            <td>${cliente ? cliente.nombre : 'Cliente no encontrado'}</td>
+                            <td>${t.tipo}</td>
+                            <td>${t.descripcion}</td>
+                            <td>$${t.monto.toFixed(2)}</td>
+                            <td>$${t.viatico.toFixed(2)}</td>
+                            <td>$${t.estacionamiento.toFixed(2)}</td>
+                            <td>
+                                <button onclick="editarTrabajo(${t.id})">Editar</button>
+                            </td>
+                            <td>
+                                <button onclick="eliminarTrabajo(${t.id})">Eliminar</button>
+                            </td>
+                        </tr>
+                    `);
+                };
+            });
+        })).then(filas => {
+            document.getElementById('trabajos-body').innerHTML = filas.join('');
+        });
+    };
 }
 
 document.addEventListener('DOMContentLoaded', function() {

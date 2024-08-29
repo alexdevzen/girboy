@@ -22,6 +22,7 @@
         
         <form id="trabajoForm" aria-labelledby="form-titulo">
             <h2 id="form-titulo">Detalles del Trabajo</h2>
+            <input type="hidden" id="trabajoId">
             <div>
                 <label for="fechaTrabajo">Fecha:</label>
                 <input type="date" id="fechaTrabajo" required>
@@ -55,14 +56,42 @@
                 <label for="montoEstacionamiento">Monto del Estacionamiento:</label>
                 <input type="number" id="montoEstacionamiento">
             </div>
-            <button type="submit">Agregar Trabajo</button>
+            <button type="submit">Guardar Trabajo</button>
         </form>
+
+        <section id="registros-section">
+            <h2>Trabajos Realizados</h2>
+            <div id="registros">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Código</th>
+                            <th>Cliente</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Monto Trabajo</th>
+                            <th>Viático</th>
+                            <th>Estacionamiento</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trabajos-body">
+                        <!-- Aquí se insertarán dinámicamente los registros -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
     <footer>
         <p>&copy; <time datetime="2024">2024</time> Sistema de Registro de Trabajos</p>
     </footer>
 
-    <script src="../script.js"></script>
+    <script src="../js/database.js"></script>
+<script src="../js/trabajos.js"></script>
+<script src="../js/clientes.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/main.js"></script>
 </body>
 </html>
