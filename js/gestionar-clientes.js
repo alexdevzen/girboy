@@ -16,6 +16,7 @@ function cargarClientes() {
                     <td>${cliente.cliente}</td>
                     <td>${cliente.direccion}</td>
                     <td>${cliente.ciudad}</td>
+                    <td><button onclick="eliminarCliente('${cliente._id}')">Eliminar</button></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -44,4 +45,18 @@ function agregarCliente(event) {
         .catch((error) => {
             console.error('Error:', error);
         });
+}
+
+function eliminarCliente(id) {
+    if (confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
+        fetch(`/api/clientes/${id}`, {
+            method: 'DELETE'
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Cliente eliminado:', data);
+                cargarClientes(); // Recargar la lista de clientes
+            })
+            .catch(error => console.error('Error:', error));
+    }
 }
