@@ -39,6 +39,7 @@
                         <th>Cliente</th>
                         <th>Dirección</th>
                         <th>Ciudad</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoTablaClientes">
@@ -46,6 +47,24 @@
                 </tbody>
             </table>
         </section>
+
+        <dialog id="modalEditarCliente">
+            <h2>Editar Cliente</h2>
+            <form id="formularioEditarCliente" method="dialog">
+                <input type="hidden" id="editId" name="id">
+                <label for="editCodigo">Código:</label>
+                <input type="text" id="editCodigo" name="codigo" required>
+                <label for="editCliente">Cliente:</label>
+                <input type="text" id="editCliente" name="cliente" required>
+                <label for="editDireccion">Dirección:</label>
+                <input type="text" id="editDireccion" name="direccion" required>
+                <label for="editCiudad">Ciudad:</label>
+                <input type="text" id="editCiudad" name="ciudad" required>
+                <button type="submit">Actualizar Cliente</button>
+                <button type="button" id="cerrarModal">Cancelar</button>
+            </form>
+        </dialog>
+
     </main>
     <script src="js/gestionar-clientes.js"></script>
 </body>
