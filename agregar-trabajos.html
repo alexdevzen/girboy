@@ -23,9 +23,12 @@
         <section id="agregarTrabajo">
             <h2>Nuevo Trabajo</h2>
             <form id="formularioTrabajo">
-                <input type="text" id="nombre" name="nombre" placeholder="Nombre del trabajo" required>
-                <input type="text" id="cliente" name="cliente" placeholder="Cliente" required>
                 <input type="date" id="fecha" name="fecha" required>
+                <input type="text" id="nombre" name="nombre" placeholder="Nombre del trabajo" required>
+                <select id="codigoCliente" name="codigoCliente" required>
+                    <option value="">Seleccione un cliente</option>
+                </select>
+
                 <button type="submit">Agregar Trabajo</button>
             </form>
         </section>
