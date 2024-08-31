@@ -1,7 +1,26 @@
+
 document.addEventListener('DOMContentLoaded', function () {
     cargarTrabajos();
+    cargarCodigosClientes();
     document.getElementById('formularioTrabajo').addEventListener('submit', agregarTrabajo);
 });
+
+
+function cargarCodigosClientes() {
+    fetch('/api/clientes')
+        .then(response => response.json())
+        .then(clientes => {
+            const select = document.getElementById('codigoCliente');
+            clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.codigo;
+                option.textContent = `${cliente.codigo} - ${cliente.cliente}`;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error al cargar los códigos de clientes', error));
+}
+
 
 function cargarTrabajos() {
     fetch('/api/trabajos')
@@ -14,7 +33,7 @@ function cargarTrabajos() {
                 tr.innerHTML = `
                     <td>${trabajo._id}</td>
                     <td>${trabajo.nombre}</td>
-                    <td>${trabajo.cliente}</td>
+                    <td>${trabajo.codigoCliente}</td>
                     <td>${trabajo.fecha}</td>
                 `;
                 tbody.appendChild(tr);
