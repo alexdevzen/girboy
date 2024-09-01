@@ -95,16 +95,43 @@ app.get('/api/clientes/:id', async (req, res) => {
 });
 
 // Rutas para trabajos
+// Rutas para trabajos
 app.get('/api/trabajos', async (req, res) => {
     try {
         const db = await conectarDB();
         const trabajos = db.collection('trabajos');
-        const resultado = await trabajos.find({}).toArray();
-        res.json(resultado);
+        
+        const { anio, mes } = req.query;
+        let query = {};
+
+        if (anio && mes) {
+            const primerDiaMes = new Date(anio, mes - 1, 1);
+            const ultimoDiaMes = new Date(anio, mes, 0);
+
+            query.fecha = {
+                $gte: primerDiaMes.toISOString().split('T')[0],
+                $lte: ultimoDiaMes.toISOString().split('T')[0]
+            };
+        }
+
+        const resultado = await trabajos.find(query).toArray();
+
+        // Agregar información del cliente
+        const clientes = db.collection('clientes');
+        const trabajosConCliente = await Promise.all(resultado.map(async (trabajo) => {
+            const cliente = await clientes.findOne({ codigo: trabajo.codigoCliente });
+            return {
+                ...trabajo,
+                ciudad: cliente ? cliente.ciudad : 'N/A'
+            };
+        }));
+
+        res.json(trabajosConCliente);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 // Actualiza la ruta POST de trabajos
 app.post('/api/trabajos', async (req, res) => {
@@ -130,6 +157,19 @@ app.post('/api/trabajos', async (req, res) => {
         };
 
         const resultado = await trabajos.insertOne(nuevoTrabajo);
+        res.json(resultado);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Añade esta ruta junto con las otras rutas de trabajos
+app.delete('/api/trabajos/:id', async (req, res) => {
+    try {
+        const db = await conectarDB();
+        const trabajos = db.collection('trabajos');
+        const id = req.params.id;
+        const resultado = await trabajos.deleteOne({ _id: new ObjectId(id) });
         res.json(resultado);
     } catch (error) {
         res.status(500).json({ error: error.message });

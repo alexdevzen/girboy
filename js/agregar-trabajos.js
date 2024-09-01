@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     cargarTrabajos();
+    document.getElementById('formularioFiltro').addEventListener('submit', filtrarTrabajos);
     cargarCiudades();
     document.getElementById('formularioTrabajo').addEventListener('submit', agregarTrabajo);
     
@@ -147,14 +148,17 @@ fetch('/api/clientes')
 
                 tr.innerHTML = `
                     <td data-label="Fecha">${trabajo.fecha}</td>
-                    <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
-                    <td data-label="Tipo">${trabajo.tipo}</td>
-                    <td data-label="Cliente">${trabajo.codigoCliente}</td>
-                    <td data-label="Ciudad">${ciudadCliente}</td>
-                    <td data-label="Valor">${valorFormateado}</td>
-                    <td data-label="Viático">${viaticoFormateado}</td>
-                    <td data-label="Estacionamiento">${estacionamientoFormateado}</td>
-                    <td data-label="Descripción">${trabajo.descripcion}</td>
+                <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
+                <td data-label="Tipo">${trabajo.tipo}</td>
+                <td data-label="Cliente">${trabajo.codigoCliente}</td>
+                <td data-label="Ciudad">${ciudadCliente}</td>
+                <td data-label="Valor">${valorFormateado}</td>
+                <td data-label="Viático">${viaticoFormateado}</td>
+                <td data-label="Estacionamiento">${estacionamientoFormateado}</td>
+                <td data-label="Descripción">${trabajo.descripcion}</td>
+                <td data-label="Acciones">
+                    <button onclick="eliminarTrabajo('${trabajo._id}')">Eliminar</button>
+                </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -210,5 +214,92 @@ function agregarTrabajo(event) {
         })
         .catch((error) => {
             console.error('Error:', error);
+        });
+}
+
+function eliminarTrabajo(id) {
+    if (confirm('¿Estás seguro de que quieres eliminar este trabajo?')) {
+        fetch(`/api/trabajos/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Trabajo eliminado:', data);
+            cargarTrabajos(); // Recargar la lista de trabajos
+        })
+        .catch(error => {
+            console.error('Error al eliminar el trabajo:', error);
+            alert('No se pudo eliminar el trabajo. Por favor, intente de nuevo.');
+        });
+    }
+}
+
+function filtrarTrabajos(event) {
+    event.preventDefault();
+    const mesSeleccionado = document.getElementById('mes').value;
+    
+    if (!mesSeleccionado) {
+        alert('Por favor, seleccione un mes para filtrar.');
+        return;
+    }
+
+    const [anio, mes] = mesSeleccionado.split('-');
+
+    fetch(`/api/trabajos?anio=${anio}&mes=${mes}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(trabajos => {
+            const tbody = document.getElementById('cuerpoTablaTrabajos');
+            tbody.innerHTML = '';
+            
+            if (trabajos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10">No se encontraron trabajos para el mes seleccionado.</td></tr>';
+                return;
+            }
+            // Aquí pegamos el código que rellena la tabla
+            trabajos.forEach(trabajo => {
+                const tr = document.createElement('tr');
+                const valorFormateado = trabajo.valor !== undefined && !isNaN(trabajo.valor)
+                    ? trabajo.valor.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+                    : 'N/A';
+                const viaticoFormateado = trabajo.viatico !== undefined && !isNaN(trabajo.viatico)
+                    ? trabajo.viatico.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+                    : 'N/A';
+                const estacionamientoFormateado = trabajo.estacionamiento !== undefined && !isNaN(trabajo.estacionamiento)
+                    ? trabajo.estacionamiento.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
+                    : 'N/A';
+                
+                const cliente = clientesData.find(c => c.codigo === trabajo.codigoCliente);
+                const ciudadCliente = cliente ? cliente.ciudad : 'N/A';
+
+                tr.innerHTML = `
+                    <td data-label="Fecha">${trabajo.fecha}</td>
+                    <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
+                    <td data-label="Tipo">${trabajo.tipo}</td>
+                    <td data-label="Cliente">${trabajo.codigoCliente}</td>
+                    <td data-label="Ciudad">${ciudadCliente}</td>
+                    <td data-label="Valor">${valorFormateado}</td>
+                    <td data-label="Viático">${viaticoFormateado}</td>
+                    <td data-label="Estacionamiento">${estacionamientoFormateado}</td>
+                    <td data-label="Descripción">${trabajo.descripcion}</td>
+                    <td data-label="Acciones">
+                        <button onclick="eliminarTrabajo('${trabajo._id}')">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(error => {
+            console.error('Error al filtrar trabajos:', error);
+            alert('Hubo un error al filtrar los trabajos. Por favor, intente de nuevo.');
         });
 }

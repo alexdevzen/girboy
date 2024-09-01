@@ -31,25 +31,31 @@ function cargarGraficoGanancias() {
 }
 
 function cargarListaTrabajos() {
-    // Aquí deberías hacer una llamada a tu API para obtener los trabajos
-    // Por ahora, usaremos datos de ejemplo
-    const trabajos = [
-        { id: 1, nombre: 'Diseño de logo', cliente: 'Empresa A', fecha: '2024-08-15' },
-        { id: 2, nombre: 'Desarrollo web', cliente: 'Empresa B', fecha: '2024-08-20' },
-        { id: 3, nombre: 'SEO', cliente: 'Empresa C', fecha: '2024-08-25' }
-    ];
+    fetch('/api/trabajos')
+        .then(response => response.json())
+        .then(trabajos => {
+            const tbody = document.getElementById('cuerpoTablaTrabajosListado');
+            tbody.innerHTML = '';
 
-    const tbody = document.getElementById('cuerpoTablaTrabajosListado');
-    tbody.innerHTML = '';
+            trabajos.forEach(trabajo => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td data-label="Fecha">${trabajo.fecha}</td>
+                    <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
+                    <td data-label="Tipo">${trabajo.tipo}</td>
+                    <td data-label="Cliente">${trabajo.codigoCliente}</td>
+                    <td data-label="Ciudad">${trabajo.ciudad}</td>
+                    <td data-label="Valor">${formatearMoneda(trabajo.valor)}</td>
+                    <td data-label="Viático">${formatearMoneda(trabajo.viatico)}</td>
+                    <td data-label="Estacionamiento">${formatearMoneda(trabajo.estacionamiento)}</td>
+                    <td data-label="Descripción">${trabajo.descripcion}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(error => console.error('Error al cargar los trabajos:', error));
+}
 
-    trabajos.forEach(trabajo => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td data-label="ID">${trabajo.id}</td>
-            <td data-label="Nombre">${trabajo.nombre}</td>
-            <td data-label="Cliente">${trabajo.cliente}</td>
-            <td data-label="Fecha">${trabajo.fecha}</td>
-        `;
-        tbody.appendChild(tr);
-    });
+function formatearMoneda(valor) {
+    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(valor);
 }

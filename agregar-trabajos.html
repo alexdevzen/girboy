@@ -95,6 +95,18 @@
             </form>
         </section>
 
+        <section id="filtroTrabajos">
+            <h2>Filtrar Trabajos</h2>
+            <form id="formularioFiltro">
+                <div class="form-group">
+                    <label for="mes">Mes:</label>
+                    <input type="month" id="mes" name="mes" required>
+                </div>
+                <button type="submit">Filtrar</button>
+            </form>
+        </section>
+
+
         <section id="listaTrabajos">
             <h2>Lista de Trabajos</h2>
             <table id="tablaTrabajos">
@@ -109,6 +121,7 @@
                         <th>Viático</th>
                         <th>Estacionamiento</th>
                         <th>Descripción</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoTablaTrabajos">
