@@ -16,10 +16,10 @@ function cargarClientes() {
             clientes.forEach(cliente => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${cliente.codigo}</td>
-                    <td>${cliente.cliente}</td>
-                    <td>${cliente.direccion}</td>
-                    <td>${cliente.ciudad}</td>
+                    <td data-label="Código">${cliente.codigo}</td>
+                    <td data-label="Cliente">${cliente.cliente}</td>
+                    <td data-label="Dirección">${cliente.direccion}</td>
+                    <td data-label="Ciudad">${cliente.ciudad}</td>
                     <td>
                     <button onclick="editarCliente('${cliente._id}')">Editar</button>
                     <button onclick="eliminarCliente('${cliente._id}')">Eliminar</button></td>

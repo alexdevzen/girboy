@@ -3,6 +3,7 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 0;
+    color: #333;
 }
 
 header {
@@ -14,6 +15,7 @@ header {
 nav ul {
     list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
 nav ul li {
@@ -28,10 +30,11 @@ nav ul li a {
 
 main {
     padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-h1,
-h2 {
+h1, h2 {
     color: #333;
 }
 
@@ -41,14 +44,11 @@ table {
     margin-top: 20px;
 }
 
-table,
-th,
-td {
+table, th, td {
     border: 1px solid #ddd;
 }
 
-th,
-td {
+th, td {
     padding: 12px;
     text-align: left;
 }
@@ -59,13 +59,25 @@ th {
 
 form {
     margin-top: 20px;
+    display: grid;
+    gap: 15px;
 }
 
 input[type="text"],
+input[type="date"],
+select,
+textarea,
 button {
-    margin: 10px 0;
-    padding: 8px;
     width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+textarea {
+    height: 100px;
+    resize: vertical;
 }
 
 button {
@@ -73,6 +85,7 @@ button {
     color: #fff;
     border: none;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
@@ -82,4 +95,41 @@ button:hover {
 #graficoGanancias {
     max-width: 100%;
     height: auto;
+}
+
+@media (max-width: 768px) {
+    nav ul li {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    tr {
+        margin-bottom: 15px;
+    }
+
+    td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+    }
+
+    td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: bold;
+    }
 }

@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agregar Trabajos</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
-
 <body>
     <header>
         <nav>
@@ -23,12 +21,27 @@
         <section id="agregarTrabajo">
             <h2>Nuevo Trabajo</h2>
             <form id="formularioTrabajo">
+                <label for="fecha">Fecha:</label>
                 <input type="date" id="fecha" name="fecha" required>
-                <input type="text" id="nombre" name="nombre" placeholder="Nombre del trabajo" required>
+                
+                <label for="codigo">Código (opcional):</label>
+                <input type="text" id="codigo" name="codigo">
+
+                <label for="tipo">Tipo:</label>
+                <select id="tipo" name="tipo" required>
+                    <option value="">Seleccione un tipo</option>
+                    <option value="Incidente">Incidente</option>
+                    <option value="Mantención">Mantención</option>
+                </select>
+                
+                <label for="codigoCliente">Cliente:</label>
                 <select id="codigoCliente" name="codigoCliente" required>
                     <option value="">Seleccione un cliente</option>
                 </select>
-
+                
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" name="descripcion" required></textarea>
+                
                 <button type="submit">Agregar Trabajo</button>
             </form>
         </section>
@@ -37,10 +50,11 @@
             <table id="tablaTrabajos">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Cliente</th>
-                        <th>Fecha</th>
+                        <th data-label="ID">ID</th>
+                        <th data-label="Fecha">Fecha</th>
+                        <th data-label="Código">Código</th>
+                        <th data-label="Cliente">Cliente</th>
+                        <th data-label="Descripción">Descripción</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoTablaTrabajos">
@@ -51,5 +65,4 @@
     </main>
     <script src="js/agregar-trabajos.js"></script>
 </body>
-
 </html>
