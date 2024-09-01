@@ -145,3 +145,24 @@ function actualizarCliente(event) {
         });
 }
 
+function eliminarCliente(id) {
+    if (confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
+        fetch(`/api/clientes/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Cliente eliminado:', data);
+            cargarClientes(); // Recargar la lista de clientes
+        })
+        .catch(error => {
+            console.error('Error al eliminar el cliente:', error);
+            alert('No se pudo eliminar el cliente. Por favor, intente de nuevo.');
+        });
+    }
+}

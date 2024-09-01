@@ -116,7 +116,15 @@ function actualizarValorCalculado() {
 }
 
 function cargarTrabajos() {
-    fetch('/api/trabajos')
+// Primero, cargar todos los clientes
+fetch('/api/clientes')
+.then(response => response.json())
+.then(clientes => {
+    clientesData = clientes;
+
+// Ahora cargar los trabajos
+    return fetch('/api/trabajos');
+})
         .then(response => response.json())
         .then(trabajos => {
             const tbody = document.getElementById('cuerpoTablaTrabajos');
@@ -132,12 +140,17 @@ function cargarTrabajos() {
                 const estacionamientoFormateado = trabajo.estacionamiento !== undefined && !isNaN(trabajo.estacionamiento)
                     ? trabajo.estacionamiento.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
                     : 'N/A';
+                
+                // Obtener la ciudad del cliente
+                const cliente = clientesData.find(c => c.codigo === trabajo.codigoCliente);
+                const ciudadCliente = cliente ? cliente.ciudad : 'N/A';
+
                 tr.innerHTML = `
-                    <td data-label="ID">${trabajo._id}</td>
                     <td data-label="Fecha">${trabajo.fecha}</td>
                     <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
                     <td data-label="Tipo">${trabajo.tipo}</td>
                     <td data-label="Cliente">${trabajo.codigoCliente}</td>
+                    <td data-label="Ciudad">${ciudadCliente}</td>
                     <td data-label="Valor">${valorFormateado}</td>
                     <td data-label="Viático">${viaticoFormateado}</td>
                     <td data-label="Estacionamiento">${estacionamientoFormateado}</td>
