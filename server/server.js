@@ -100,9 +100,12 @@ app.post('/api/trabajos', async (req, res) => {
         }
 
         const nuevoTrabajo = {
-            nombre: req.body.nombre,
             fecha: req.body.fecha,
+            tipo: req.body.tipo,
             codigoCliente: req.body.codigoCliente,
+            descripcion: req.body.descripcion,
+            // Incluimos el código solo si se proporcionó
+            ...(req.body.codigo && { codigo: req.body.codigo })
         };
 
         const resultado = await trabajos.insertOne(nuevoTrabajo);

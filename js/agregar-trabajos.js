@@ -1,10 +1,8 @@
-
 document.addEventListener('DOMContentLoaded', function () {
     cargarTrabajos();
     cargarCodigosClientes();
     document.getElementById('formularioTrabajo').addEventListener('submit', agregarTrabajo);
 });
-
 
 function cargarCodigosClientes() {
     fetch('/api/clientes')
@@ -18,9 +16,8 @@ function cargarCodigosClientes() {
                 select.appendChild(option);
             });
         })
-        .catch(error => console.error('Error al cargar los códigos de clientes', error));
+        .catch(error => console.error('Error al cargar los códigos de clientes:', error));
 }
-
 
 function cargarTrabajos() {
     fetch('/api/trabajos')
@@ -31,10 +28,12 @@ function cargarTrabajos() {
             trabajos.forEach(trabajo => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${trabajo._id}</td>
-                    <td>${trabajo.nombre}</td>
-                    <td>${trabajo.codigoCliente}</td>
-                    <td>${trabajo.fecha}</td>
+                    <td data-label="ID">${trabajo._id}</td>
+                    <td data-label="Fecha">${trabajo.fecha}</td>
+                    <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
+                    <td data-label="Tipo">${trabajo.tipo}</td>
+                    <td data-label="Cliente">${trabajo.codigoCliente}</td>
+                    <td data-label="Descripción">${trabajo.descripcion}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -46,6 +45,11 @@ function agregarTrabajo(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
     const trabajoData = Object.fromEntries(formData.entries());
+
+    // Si el código está vacío, lo eliminamos del objeto para que no se envíe
+    if (!trabajoData.codigo) {
+        delete trabajoData.codigo;
+    }
 
     fetch('/api/trabajos', {
         method: 'POST',

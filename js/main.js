@@ -45,10 +45,10 @@ function cargarListaTrabajos() {
     trabajos.forEach(trabajo => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${trabajo.id}</td>
-            <td>${trabajo.nombre}</td>
-            <td>${trabajo.cliente}</td>
-            <td>${trabajo.fecha}</td>
+            <td data-label="ID">${trabajo.id}</td>
+            <td data-label="Nombre">${trabajo.nombre}</td>
+            <td data-label="Cliente">${trabajo.cliente}</td>
+            <td data-label="Fecha">${trabajo.fecha}</td>
         `;
         tbody.appendChild(tr);
     });
