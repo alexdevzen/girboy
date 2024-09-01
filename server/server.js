@@ -11,25 +11,30 @@ app.use(express.static(path.join(__dirname, '..')));
 app.use(express.json());
 
 
+// Ruta para obtener todas las ciudades únicas
+app.get('/api/ciudades', async (req, res) => {
+    try {
+        const db = await conectarDB();
+        const clientes = db.collection('clientes');
+        const ciudades = await clientes.distinct('ciudad');
+        res.json(ciudades);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
 
 // Rutas para clientes
 app.get('/api/clientes', async (req, res) => {
     try {
         const db = await conectarDB();
         const clientes = db.collection('clientes');
-        const resultado = await clientes.find({}).toArray();
-        res.json(resultado);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/api/clientes/:id', async (req, res) => {
-    try {
-        const db = await conectarDB();
-        const clientes = db.collection('clientes');
-        const id = req.params.id;
-        const resultado = await clientes.findOne({ _id: new ObjectId(id) });
+        let query = {};
+        if (req.query.ciudad) {
+            query.ciudad = req.query.ciudad;
+        }
+        const resultado = await clientes.find(query).toArray();
         res.json(resultado);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -74,6 +79,21 @@ app.delete('/api/clientes/:id', async (req, res) => {
     }
 });
 
+app.get('/api/clientes/:id', async (req, res) => {
+    try {
+        const db = await conectarDB();
+        const clientes = db.collection('clientes');
+        const id = req.params.id;
+        const resultado = await clientes.findOne({ _id: new ObjectId(id) });
+        if (!resultado) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
+        res.json(resultado);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Rutas para trabajos
 app.get('/api/trabajos', async (req, res) => {
     try {
@@ -93,7 +113,6 @@ app.post('/api/trabajos', async (req, res) => {
         const trabajos = db.collection('trabajos');
         const clientes = db.collection('clientes');
 
-        // Verificar si el código de cliente existe
         const clienteExistente = await clientes.findOne({ codigo: req.body.codigoCliente });
         if (!clienteExistente) {
             return res.status(400).json({ error: 'El código de cliente no existe' });
@@ -104,7 +123,9 @@ app.post('/api/trabajos', async (req, res) => {
             tipo: req.body.tipo,
             codigoCliente: req.body.codigoCliente,
             descripcion: req.body.descripcion,
-            // Incluimos el código solo si se proporcionó
+            valor: req.body.valor,
+            viatico: req.body.viatico,
+            estacionamiento: req.body.estacionamiento, // Aseguramos que se incluya el campo de estacionamiento
             ...(req.body.codigo && { codigo: req.body.codigo })
         };
 
@@ -113,6 +134,12 @@ app.post('/api/trabajos', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+});
+
+//middleware de manejo de errores
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Ocurrió un error en el servidor' });
 });
 
 app.listen(port, () => {

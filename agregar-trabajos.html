@@ -16,45 +16,99 @@
             </ul>
         </nav>
     </header>
+
     <main>
         <h1>Agregar Trabajos</h1>
+
         <section id="agregarTrabajo">
             <h2>Nuevo Trabajo</h2>
             <form id="formularioTrabajo">
-                <label for="fecha">Fecha:</label>
-                <input type="date" id="fecha" name="fecha" required>
-                
-                <label for="codigo">Código (opcional):</label>
-                <input type="text" id="codigo" name="codigo">
+                <div class="form-group">
+                    <label for="fecha">Fecha:</label>
+                    <input type="date" id="fecha" name="fecha" required>
+                </div>
 
-                <label for="tipo">Tipo:</label>
-                <select id="tipo" name="tipo" required>
-                    <option value="">Seleccione un tipo</option>
-                    <option value="Incidente">Incidente</option>
-                    <option value="Mantención">Mantención</option>
-                </select>
-                
-                <label for="codigoCliente">Cliente:</label>
-                <select id="codigoCliente" name="codigoCliente" required>
-                    <option value="">Seleccione un cliente</option>
-                </select>
-                
-                <label for="descripcion">Descripción:</label>
-                <textarea id="descripcion" name="descripcion" required></textarea>
-                
+                <div class="form-group">
+                    <label for="codigo">Código (opcional):</label>
+                    <input type="text" id="codigo" name="codigo">
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo">Tipo:</label>
+                    <select id="tipo" name="tipo" required>
+                        <option value="">Seleccione un tipo</option>
+                        <option value="Incidente">Incidente</option>
+                        <option value="Mantención">Mantención</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="ciudad">Ciudad:</label>
+                    <select id="ciudad" name="ciudad" required>
+                        <option value="">Seleccione una ciudad</option>
+                        <!-- Las ciudades se cargarán dinámicamente -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="codigoCliente">Cliente:</label>
+                    <select id="codigoCliente" name="codigoCliente" required>
+                        <option value="">Seleccione un cliente</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipoValor">Tipo de Valor:</label>
+                    <select id="tipoValor" name="tipoValor" required>
+                        <option value="">Seleccione el tipo de valor</option>
+                        <option value="mantenimiento">Valor Mantenimiento</option>
+                        <option value="incidente">Valor Incidente</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="multiplicadorGroup" style="display: none;">
+                    <label for="multiplicador">Multiplicador:</label>
+                    <input type="number" id="multiplicador" name="multiplicador" min="1" value="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="valorCalculado">Valor Calculado:</label>
+                    <input type="text" id="valorCalculado" name="valorCalculado" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="viatico">Viático:</label>
+                    <input type="text" id="viatico" name="viatico" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="estacionamiento">Estacionamiento:</label>
+                    <input type="number" id="estacionamiento" name="estacionamiento" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion" name="descripcion" required></textarea>
+                </div>
+
                 <button type="submit">Agregar Trabajo</button>
             </form>
         </section>
+
         <section id="listaTrabajos">
             <h2>Lista de Trabajos</h2>
             <table id="tablaTrabajos">
                 <thead>
                     <tr>
-                        <th data-label="ID">ID</th>
-                        <th data-label="Fecha">Fecha</th>
-                        <th data-label="Código">Código</th>
-                        <th data-label="Cliente">Cliente</th>
-                        <th data-label="Descripción">Descripción</th>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Código</th>
+                        <th>Tipo</th>
+                        <th>Cliente</th>
+                        <th>Valor</th>
+                        <th>Viatico</th>
+                        <th>Estacionamiento</th>
+                        <th>Descripción</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoTablaTrabajos">
@@ -63,6 +117,7 @@
             </table>
         </section>
     </main>
+
     <script src="js/agregar-trabajos.js"></script>
 </body>
 </html>
