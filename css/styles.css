@@ -1,11 +1,14 @@
+/* Variables globales */
 :root {
     --primary-color: #3498db;
     --secondary-color: #2c3e50;
     --background-color: #f4f4f4;
     --text-color: #333;
     --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --transition-speed: 0.3s;
 }
 
+/* Estilos base */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -19,6 +22,7 @@ body {
     background-color: var(--background-color);
 }
 
+/* Estilos del encabezado y navegación */
 header {
     background-color: var(--primary-color);
     color: white;
@@ -40,20 +44,22 @@ nav ul li a {
     color: white;
     text-decoration: none;
     font-weight: 500;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--transition-speed) ease;
 }
 
 nav ul li a:hover {
     opacity: 0.8;
 }
 
+/* Estilos del contenido principal */
 main {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 0 20px;
 }
 
-h1, h2 {
+h1,
+h2 {
     color: var(--secondary-color);
     margin-bottom: 1rem;
 }
@@ -66,13 +72,15 @@ h1, h2 {
     margin-bottom: 2rem;
 }
 
+/* Estilos de las tablas */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
 }
 
-th, td {
+th,
+td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #ddd;
@@ -87,6 +95,7 @@ tr:hover {
     background-color: #f5f5f5;
 }
 
+/* Estilos de formularios */
 form {
     display: grid;
     gap: 1rem;
@@ -111,19 +120,21 @@ button {
     padding: 10px 20px;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color var(--transition-speed) ease;
 }
 
 button:hover {
     background-color: #2980b9;
 }
 
+/* Estilos específicos */
 #graficoGanancias {
     width: 100%;
     height: 400px;
     margin-top: 1rem;
 }
 
+/* Media queries para diseño responsive */
 @media (max-width: 768px) {
     nav ul {
         flex-direction: column;
@@ -137,7 +148,13 @@ button:hover {
         padding: 1rem;
     }
 
-    table, thead, tbody, th, td, tr {
+    /* Convertir tabla a formato lista para móviles */
+    table,
+    thead,
+    tbody,
+    th,
+    td,
+    tr {
         display: block;
     }
 
@@ -168,4 +185,21 @@ button:hover {
         white-space: nowrap;
         font-weight: bold;
     }
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+}
+
+/* Estilos de foco para mejorar la accesibilidad por teclado */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
