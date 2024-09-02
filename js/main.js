@@ -1,3 +1,11 @@
+/**
+ * Variable global para mantener la referencia al gráfico de ganancias
+ */
+let graficoGanancias;
+
+/**
+ * Inicializa la página cuando el DOM está completamente cargado
+ */
 document.addEventListener('DOMContentLoaded', function () {
     llenarSelectorAño();
     cargarGraficoGanancias();
@@ -6,6 +14,9 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('añoGanancias').addEventListener('change', cargarGraficoGanancias);
 });
 
+/**
+ * Llena el selector de año con opciones desde el año actual hasta 5 años atrás
+ */
 function llenarSelectorAño() {
     const selectAño = document.getElementById('añoGanancias');
     const añoActual = new Date().getFullYear();
@@ -17,8 +28,9 @@ function llenarSelectorAño() {
     }
 }
 
-let graficoGanancias; // Variable global para mantener la referencia al gráfico
-
+/**
+ * Carga y muestra el gráfico de ganancias para el año seleccionado
+ */
 function cargarGraficoGanancias() {
     const año = document.getElementById('añoGanancias').value || new Date().getFullYear();
 
@@ -51,7 +63,7 @@ function cargarGraficoGanancias() {
                             beginAtZero: true,
                             ticks: {
                                 callback: function (value, index, values) {
-                                    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
+                                    return formatearMoneda(value);
                                 }
                             }
                         }
@@ -65,7 +77,7 @@ function cargarGraficoGanancias() {
                                         label += ': ';
                                     }
                                     if (context.parsed.y !== null) {
-                                        label += new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(context.parsed.y);
+                                        label += formatearMoneda(context.parsed.y);
                                     }
                                     return label;
                                 }
@@ -78,6 +90,11 @@ function cargarGraficoGanancias() {
         .catch(error => console.error('Error al cargar las ganancias:', error));
 }
 
+/**
+ * Carga la lista de trabajos, opcionalmente filtrada por año y mes
+ * @param {number} [anio] - Año para filtrar los trabajos
+ * @param {number} [mes] - Mes para filtrar los trabajos
+ */
 function cargarListaTrabajos(anio, mes) {
     let url = '/api/trabajos';
     if (anio && mes) {
@@ -114,6 +131,10 @@ function cargarListaTrabajos(anio, mes) {
         .catch(error => console.error('Error al cargar los trabajos:', error));
 }
 
+/**
+ * Filtra los trabajos por el mes seleccionado
+ * @param {Event} event - Evento del formulario
+ */
 function filtrarTrabajos(event) {
     event.preventDefault();
     const mesSeleccionado = document.getElementById('mes').value;
@@ -127,6 +148,11 @@ function filtrarTrabajos(event) {
     cargarListaTrabajos(anio, mes);
 }
 
+/**
+ * Formatea un valor numérico a formato de moneda chilena
+ * @param {number} valor - Valor a formatear
+ * @return {string} Valor formateado como moneda chilena
+ */
 function formatearMoneda(valor) {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(valor);
 }

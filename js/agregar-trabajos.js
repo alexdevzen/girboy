@@ -1,48 +1,44 @@
+// Variables globales para almacenar datos de clientes y ciudades
+let clientesData = [];
+let ciudadesData = [];
+
+/**
+ * Inicializa la página cargando datos y configurando event listeners
+ */
 function initializePage() {
     cargarTrabajos();
     cargarCiudades();
 
-    const formularioTrabajo = document.getElementById('formularioTrabajo');
-    const formularioFiltro = document.getElementById('formularioFiltro');
-    const ciudadSelect = document.getElementById('ciudad');
-    const codigoClienteSelect = document.getElementById('codigoCliente');
-    const tipoValorSelect = document.getElementById('tipoValor');
-    const multiplicadorInput = document.getElementById('multiplicador');
-    const descargarExcelBtn = document.getElementById('descargarExcel');
+    // Configurar event listeners para elementos del DOM
+    const elementos = {
+        'formularioTrabajo': ['submit', agregarTrabajo],
+        'formularioFiltro': ['submit', filtrarTrabajos],
+        'ciudad': ['change', cargarClientesPorCiudad],
+        'codigoCliente': ['change', actualizarValoresCliente],
+        'tipoValor': ['change', manejarCambioTipoValor],
+        'multiplicador': ['input', actualizarValorCalculado],
+        'descargarExcel': ['click', descargarExcel]
+    };
 
-    if (formularioTrabajo) {
-        formularioTrabajo.addEventListener('submit', agregarTrabajo);
-    }
-    if (formularioFiltro) {
-        formularioFiltro.addEventListener('submit', filtrarTrabajos);
-    }
-    if (ciudadSelect) {
-        ciudadSelect.addEventListener('change', cargarClientesPorCiudad);
-    }
-    if (codigoClienteSelect) {
-        codigoClienteSelect.addEventListener('change', actualizarValoresCliente);
-    }
-    if (tipoValorSelect) {
-        tipoValorSelect.addEventListener('change', manejarCambioTipoValor);
-    }
-    if (multiplicadorInput) {
-        multiplicadorInput.addEventListener('input', actualizarValorCalculado);
-    }
-    if (descargarExcelBtn) {
-        descargarExcelBtn.addEventListener('click', descargarExcel);
+    for (const [id, [evento, handler]] of Object.entries(elementos)) {
+        const elemento = document.getElementById(id);
+        if (elemento) elemento.addEventListener(evento, handler);
     }
 }
 
-let clientesData = [];
-let ciudadesData = [];
-
-
-// Agregar esta función auxiliar al principio del archivo
+/**
+ * Formatea una fecha de YYYY-MM-DD a DD/MM/YYYY
+ * @param {string} fechaString - Fecha en formato YYYY-MM-DD
+ * @return {string} Fecha formateada como DD/MM/YYYY
+ */
 function formatearFecha(fechaString) {
     const [anio, mes, dia] = fechaString.split('-');
     return `${dia}/${mes}/${anio}`;
 }
 
+/**
+ * Carga y muestra la lista de trabajos
+ */
 function cargarTrabajos() {
     Promise.all([
         fetch('/api/clientes').then(response => response.json()),
@@ -83,7 +79,9 @@ function cargarTrabajos() {
         });
 }
 
-
+/**
+ * Carga la lista de ciudades en el selector correspondiente
+ */
 function cargarCiudades() {
     fetch('/api/ciudades')
         .then(response => response.json())
@@ -101,6 +99,9 @@ function cargarCiudades() {
         .catch(error => console.error('Error al cargar las ciudades:', error));
 }
 
+/**
+ * Carga la lista de clientes correspondiente a la ciudad seleccionada
+ */
 function cargarClientesPorCiudad() {
     const ciudadSeleccionada = document.getElementById('ciudad').value;
     const selectCliente = document.getElementById('codigoCliente');
@@ -138,29 +139,31 @@ function cargarClientesPorCiudad() {
         });
 }
 
+/**
+ * Actualiza los valores de viático y estacionamiento según el cliente seleccionado
+ */
 function actualizarValoresCliente() {
     const codigoCliente = document.getElementById('codigoCliente').value;
     const cliente = clientesData.find(c => c.codigo === codigoCliente);
 
-    // Actualiza los valores si el cliente existe
     if (cliente) {
         document.getElementById('viatico').value = cliente.viatico;
-        const viaticoFormatted = document.getElementById('viaticoFormatted');
-        if (viaticoFormatted) {
-            viaticoFormatted.textContent = formatearValorMoneda(cliente.viatico);
-        }
         document.getElementById('estacionamiento').value = cliente.estacionamiento;
-        const estacionamientoFormatted = document.getElementById('estacionamientoFormatted');
-        if (estacionamientoFormatted) {
-            estacionamientoFormatted.textContent = formatearValorMoneda(cliente.estacionamiento);
-        }
+        ['viatico', 'estacionamiento'].forEach(campo => {
+            const elementoFormateado = document.getElementById(`${campo}Formatted`);
+            if (elementoFormateado) {
+                elementoFormateado.textContent = formatearValorMoneda(cliente[campo]);
+            }
+        });
         actualizarValorCalculado();
     } else {
         limpiarCamposCalculados();
     }
 }
 
-
+/**
+ * Maneja el cambio en el tipo de valor (mantenimiento o incidente)
+ */
 function manejarCambioTipoValor() {
     const tipoValor = document.getElementById('tipoValor').value;
     const multiplicadorGroup = document.getElementById('multiplicadorGroup');
@@ -169,6 +172,9 @@ function manejarCambioTipoValor() {
     actualizarValorCalculado();
 }
 
+/**
+ * Actualiza el valor calculado basado en el tipo de valor y el multiplicador
+ */
 function actualizarValorCalculado() {
     const codigoCliente = document.getElementById('codigoCliente').value;
     const tipoValor = document.getElementById('tipoValor').value;
@@ -177,14 +183,8 @@ function actualizarValorCalculado() {
     const cliente = clientesData.find(c => c.codigo === codigoCliente);
     if (!cliente) return;
 
-    let valor = 0;
-    if (tipoValor === 'mantenimiento') {
-        valor = cliente.valorMantenimiento;
-    } else if (tipoValor === 'incidente') {
-        valor = cliente.valorIncidente * multiplicador;
-    }
+    let valor = tipoValor === 'mantenimiento' ? cliente.valorMantenimiento : cliente.valorIncidente * multiplicador;
 
-    // Actualiza el valor calculado
     const valorCalculado = document.getElementById('valorCalculado');
     if (valorCalculado) {
         valorCalculado.value = valor;
@@ -195,39 +195,10 @@ function actualizarValorCalculado() {
     }
 }
 
-
-function cargarTrabajos() {
-    Promise.all([
-        fetch('/api/clientes').then(response => response.json()),
-        fetch('/api/trabajos').then(response => response.json())
-    ])
-        .then(([clientes, trabajos]) => {
-            clientesData = clientes;
-            const tbody = document.getElementById('cuerpoTablaTrabajos');
-            tbody.innerHTML = '';
-            trabajos.forEach(trabajo => {
-                const tr = document.createElement('tr');
-                const cliente = clientesData.find(c => c.codigo === trabajo.codigoCliente);
-                tr.innerHTML = `
-                <td data-label="Fecha">${formatearFecha(trabajo.fecha)}</td>
-                <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
-                <td data-label="Tipo">${trabajo.tipo}</td>
-                <td data-label="Cliente">${trabajo.codigoCliente}</td>
-                <td data-label="Ciudad">${cliente ? cliente.ciudad : 'N/A'}</td>
-                <td data-label="Valor">${formatearValorMoneda(trabajo.valor)}</td>
-                <td data-label="Viático">${formatearValorMoneda(trabajo.viatico)}</td>
-                <td data-label="Estacionamiento">${formatearValorMoneda(trabajo.estacionamiento)}</td>
-                <td data-label="Descripción">${trabajo.descripcion}</td>
-                <td data-label="Acciones">
-                    <button onclick="eliminarTrabajo('${trabajo._id}')">Eliminar</button>
-                </td>
-            `;
-                tbody.appendChild(tr);
-            });
-        })
-        .catch(error => console.error('Error:', error));
-}
-
+/**
+ * Agrega un nuevo trabajo
+ * @param {Event} event - Evento del formulario
+ */
 function agregarTrabajo(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -293,7 +264,9 @@ function agregarTrabajo(event) {
         });
 }
 
-
+/**
+ * Limpia los campos calculados del formulario
+ */
 function limpiarCamposCalculados() {
     ['valorCalculado', 'viatico', 'estacionamiento'].forEach(campo => {
         document.getElementById(campo).value = '';
@@ -303,6 +276,10 @@ function limpiarCamposCalculados() {
     document.getElementById('multiplicadorGroup').style.display = 'none';
 }
 
+/**
+ * Elimina un trabajo específico
+ * @param {string} id - ID del trabajo a eliminar
+ */
 function eliminarTrabajo(id) {
     if (confirm('¿Estás seguro de que quieres eliminar este trabajo?')) {
         fetch(`/api/trabajos/${id}`, {
@@ -325,6 +302,10 @@ function eliminarTrabajo(id) {
     }
 }
 
+/**
+ * Filtra los trabajos por mes
+ * @param {Event} event - Evento del formulario de filtro
+ */
 function filtrarTrabajos(event) {
     event.preventDefault();
     const mesSeleccionado = document.getElementById('mes').value;
@@ -377,10 +358,18 @@ function filtrarTrabajos(event) {
         });
 }
 
+/**
+ * Formatea un valor numérico a formato de moneda chilena
+ * @param {number} valor - Valor a formatear
+ * @return {string} Valor formateado como moneda chilena
+ */
 function formatearValorMoneda(valor) {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(valor);
 }
 
+/**
+ * Descarga un archivo Excel con los trabajos del mes seleccionado
+ */
 function descargarExcel() {
     const mesSeleccionado = document.getElementById('mes').value;
 
@@ -415,4 +404,5 @@ function descargarExcel() {
         });
 }
 
+// Inicializar la página cuando el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', initializePage);
