@@ -5,8 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <!-- Asegúrate de incluir la librería de Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -23,58 +24,52 @@
     <main>
         <h1>Dashboard</h1>
 
-        <div class="card">
-            <section id="ganancias">
-                <h2>Ingresos Mensuales</h2>
-                <div>
-                    <label for="añoGanancias">Seleccionar año:</label>
-                    <select id="añoGanancias">
-                        <!-- Las opciones se llenarán dinámicamente con JavaScript -->
-                    </select>
+        <!-- Sección para mostrar los ingresos mensuales -->
+        <section class="card">
+            <h2>Ingresos Mensuales</h2>
+            <div>
+                <label for="añoGanancias">Seleccionar año:</label>
+                <select id="añoGanancias"></select>
+            </div>
+            <canvas id="graficoGanancias"></canvas>
+        </section>
+
+        <!-- Sección para filtrar trabajos -->
+        <section class="card">
+            <h2>Filtrar Trabajos</h2>
+            <form id="formularioFiltro">
+                <div class="form-group">
+                    <label for="mes">Mes:</label>
+                    <input type="month" id="mes" name="mes" required>
                 </div>
-                <canvas id="graficoGanancias"></canvas>
-            </section>
-        </div>
+                <button type="submit">Filtrar</button>
+            </form>
+        </section>
 
-        <div class="card">
-            <section id="filtroTrabajos">
-                <h2>Filtrar Trabajos</h2>
-                <form id="formularioFiltro">
-                    <div class="form-group">
-                        <label for="mes">Mes:</label>
-                        <input type="month" id="mes" name="mes" required>
-                    </div>
-                    <button type="submit">Filtrar</button>
-                </form>
-            </section>
-        </div>
-
-        <div class="card">
-            <section id="trabajos">
-                <h2>Lista de Trabajos</h2>
-                <table id="tablaTrabajosListado">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Código</th>
-                            <th>Tipo</th>
-                            <th>Cliente</th>
-                            <th>Ciudad</th>
-                            <th>Valor</th>
-                            <th>Viático</th>
-                            <th>Estacionamiento</th>
-                            <th>Descripción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cuerpoTablaTrabajosListado">
-                        <!-- Los trabajos se cargarán aquí dinámicamente -->
-                    </tbody>
-                </table>
-            </section>
-        </div>
+        <!-- Sección para mostrar la lista de trabajos -->
+        <section class="card">
+            <h2>Lista de Trabajos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Código</th>
+                        <th>Tipo</th>
+                        <th>Cliente</th>
+                        <th>Ciudad</th>
+                        <th>Valor</th>
+                        <th>Viático</th>
+                        <th>Estacionamiento</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTablaTrabajosListado">
+                    <!-- Los trabajos se cargarán dinámicamente aquí -->
+                </tbody>
+            </table>
+        </section>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/main.js"></script>
 </body>
 

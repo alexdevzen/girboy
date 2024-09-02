@@ -1,18 +1,20 @@
 const express = require('express');
 const { ObjectId } = require('mongodb');
 const path = require('path');
-const { conectarDB } = require('./db');  // Importamos la función conectarDB
+const { conectarDB } = require('./db');
+const Excel = require('exceljs');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-const Excel = require('exceljs');
 
+// Configuración de middleware
 app.use(express.static(path.join(__dirname, '..')));
 app.use(express.json());
 
-
-// Ruta para obtener todas las ciudades únicas
+/**
+ * Obtiene todas las ciudades únicas
+ */
 app.get('/api/ciudades', async (req, res) => {
     try {
         const db = await conectarDB();
@@ -24,17 +26,14 @@ app.get('/api/ciudades', async (req, res) => {
     }
 });
 
-
-
-// Rutas para clientes
+/**
+ * Rutas para clientes
+ */
 app.get('/api/clientes', async (req, res) => {
     try {
         const db = await conectarDB();
         const clientes = db.collection('clientes');
-        let query = {};
-        if (req.query.ciudad) {
-            query.ciudad = req.query.ciudad;
-        }
+        let query = req.query.ciudad ? { ciudad: req.query.ciudad } : {};
         const resultado = await clientes.find(query).toArray();
         res.json(resultado);
     } catch (error) {
@@ -95,12 +94,14 @@ app.get('/api/clientes/:id', async (req, res) => {
     }
 });
 
-
-// Rutas para trabajos
+/**
+ * Rutas para trabajos
+ */
 app.get('/api/trabajos', async (req, res) => {
     try {
         const db = await conectarDB();
         const trabajos = db.collection('trabajos');
+        const clientes = db.collection('clientes');
 
         const { anio, mes } = req.query;
         let query = {};
@@ -108,7 +109,6 @@ app.get('/api/trabajos', async (req, res) => {
         if (anio && mes) {
             const primerDiaMes = new Date(anio, mes - 1, 1);
             const ultimoDiaMes = new Date(anio, mes, 0);
-
             query.fecha = {
                 $gte: primerDiaMes.toISOString().split('T')[0],
                 $lte: ultimoDiaMes.toISOString().split('T')[0]
@@ -118,7 +118,6 @@ app.get('/api/trabajos', async (req, res) => {
         const resultado = await trabajos.find(query).toArray();
 
         // Agregar información del cliente
-        const clientes = db.collection('clientes');
         const trabajosConCliente = await Promise.all(resultado.map(async (trabajo) => {
             const cliente = await clientes.findOne({ codigo: trabajo.codigoCliente });
             return {
@@ -133,8 +132,6 @@ app.get('/api/trabajos', async (req, res) => {
     }
 });
 
-
-// Actualiza la ruta POST de trabajos
 app.post('/api/trabajos', async (req, res) => {
     try {
         const db = await conectarDB();
@@ -148,7 +145,7 @@ app.post('/api/trabajos', async (req, res) => {
 
         const nuevoTrabajo = {
             fecha: req.body.fecha,
-            tipo: req.body.tipo, // Esto ya vendrá como 'Mantenimiento' o 'Incidente' del cliente
+            tipo: req.body.tipo,
             codigoCliente: req.body.codigoCliente,
             descripcion: req.body.descripcion,
             valor: req.body.valor,
@@ -164,7 +161,6 @@ app.post('/api/trabajos', async (req, res) => {
     }
 });
 
-// Añade esta ruta junto con las otras rutas de trabajos
 app.delete('/api/trabajos/:id', async (req, res) => {
     try {
         const db = await conectarDB();
@@ -177,18 +173,15 @@ app.delete('/api/trabajos/:id', async (req, res) => {
     }
 });
 
-
-//Ruta para ganancias
-// Añade esta nueva ruta en server.js
+/**
+ * Ruta para obtener ganancias
+ */
 app.get('/api/ganancias', async (req, res) => {
     try {
         const db = await conectarDB();
         const trabajos = db.collection('trabajos');
-
-        // Obtener el año actual si no se proporciona
         const año = parseInt(req.query.año) || new Date().getFullYear();
 
-        // Agregación para calcular ganancias mensuales
         const resultado = await trabajos.aggregate([
             {
                 $match: {
@@ -200,7 +193,7 @@ app.get('/api/ganancias', async (req, res) => {
             },
             {
                 $group: {
-                    _id: { $substr: ['$fecha', 5, 2] }, // Mes
+                    _id: { $substr: ['$fecha', 5, 2] },
                     ganancias: { $sum: '$valor' }
                 }
             },
@@ -209,10 +202,9 @@ app.get('/api/ganancias', async (req, res) => {
             }
         ]).toArray();
 
-        // Crear un array de 12 meses con ganancias
         const gananciasmensuales = Array(12).fill(0);
         resultado.forEach(item => {
-            const mes = parseInt(item._id) - 1; // Restamos 1 porque los meses en JavaScript van de 0 a 11
+            const mes = parseInt(item._id) - 1;
             gananciasmensuales[mes] = item.ganancias;
         });
 
@@ -222,7 +214,9 @@ app.get('/api/ganancias', async (req, res) => {
     }
 });
 
-//Endpoint Excel
+/**
+ * Endpoint para generar Excel
+ */
 app.get('/api/trabajos/excel', async (req, res) => {
     try {
         const { anio, mes } = req.query;
@@ -242,11 +236,9 @@ app.get('/api/trabajos/excel', async (req, res) => {
 
         const resultado = await trabajos.find(query).toArray();
 
-        // Crear un nuevo libro de trabajo y una hoja de cálculo
         const workbook = new Excel.Workbook();
         const worksheet = workbook.addWorksheet('Trabajos');
 
-        // Definir las columnas
         worksheet.columns = [
             { header: 'Fecha', key: 'fecha', width: 15 },
             { header: 'Código', key: 'codigo', width: 15 },
@@ -259,7 +251,6 @@ app.get('/api/trabajos/excel', async (req, res) => {
             { header: 'Descripción', key: 'descripcion', width: 30 }
         ];
 
-        // Agregar los datos
         for (const trabajo of resultado) {
             const cliente = await clientes.findOne({ codigo: trabajo.codigoCliente });
             worksheet.addRow({
@@ -268,11 +259,9 @@ app.get('/api/trabajos/excel', async (req, res) => {
             });
         }
 
-        // Configurar la respuesta
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename=trabajos-${anio}-${mes}.xlsx`);
 
-        // Escribir a la respuesta
         await workbook.xlsx.write(res);
         res.end();
 
@@ -282,13 +271,13 @@ app.get('/api/trabajos/excel', async (req, res) => {
     }
 });
 
-
-//middleware de manejo de errores
+// Middleware de manejo de errores
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ error: 'Ocurrió un error en el servidor' });
 });
 
+// Iniciar el servidor
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
 });
