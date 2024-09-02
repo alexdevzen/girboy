@@ -1,7 +1,7 @@
 function initializePage() {
     cargarTrabajos();
     cargarCiudades();
-    
+
     const formularioTrabajo = document.getElementById('formularioTrabajo');
     const formularioFiltro = document.getElementById('formularioFiltro');
     const ciudadSelect = document.getElementById('ciudad');
@@ -52,7 +52,7 @@ function cargarCiudades() {
 function cargarClientesPorCiudad() {
     const ciudadSeleccionada = document.getElementById('ciudad').value;
     const selectCliente = document.getElementById('codigoCliente');
-    
+
     if (!selectCliente) {
         console.error('Elemento codigoCliente no encontrado');
         return;
@@ -149,14 +149,14 @@ function cargarTrabajos() {
         fetch('/api/clientes').then(response => response.json()),
         fetch('/api/trabajos').then(response => response.json())
     ])
-    .then(([clientes, trabajos]) => {
-        clientesData = clientes;
-        const tbody = document.getElementById('cuerpoTablaTrabajos');
-        tbody.innerHTML = '';
-        trabajos.forEach(trabajo => {
-            const tr = document.createElement('tr');
-            const cliente = clientesData.find(c => c.codigo === trabajo.codigoCliente);
-            tr.innerHTML = `
+        .then(([clientes, trabajos]) => {
+            clientesData = clientes;
+            const tbody = document.getElementById('cuerpoTablaTrabajos');
+            tbody.innerHTML = '';
+            trabajos.forEach(trabajo => {
+                const tr = document.createElement('tr');
+                const cliente = clientesData.find(c => c.codigo === trabajo.codigoCliente);
+                tr.innerHTML = `
                 <td data-label="Fecha">${trabajo.fecha}</td>
                 <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
                 <td data-label="Tipo">${trabajo.tipo}</td>
@@ -170,10 +170,10 @@ function cargarTrabajos() {
                     <button onclick="eliminarTrabajo('${trabajo._id}')">Eliminar</button>
                 </td>
             `;
-            tbody.appendChild(tr);
-        });
-    })
-    .catch(error => console.error('Error:', error));
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 function agregarTrabajo(event) {
@@ -181,30 +181,27 @@ function agregarTrabajo(event) {
     const formData = new FormData(event.target);
     const trabajoData = Object.fromEntries(formData.entries());
 
-    // Imprime los datos para depuración
     console.log('Datos del formulario:', trabajoData);
 
-    // Verifica y limpia los datos antes de enviarlos
     if (!trabajoData.codigo) {
         delete trabajoData.codigo;
     }
 
-    // Verifica si el cliente está seleccionado
     if (!trabajoData.codigoCliente) {
         alert('Por favor, seleccione un cliente.');
         return;
     }
 
-    // Calcula el valor y el viático si el cliente está presente
     const cliente = clientesData.find(c => c.codigo === trabajoData.codigoCliente);
     if (cliente) {
-        trabajoData.valor = trabajoData.tipoValor === 'mantenimiento' 
-            ? cliente.valorMantenimiento 
+        trabajoData.valor = trabajoData.tipoValor === 'mantenimiento'
+            ? cliente.valorMantenimiento
             : cliente.valorIncidente * parseInt(trabajoData.multiplicador || 1);
         trabajoData.viatico = cliente.viatico;
+        trabajoData.estacionamiento = cliente.estacionamiento;
     } else {
-        trabajoData.valor = 0;
-        trabajoData.viatico = 0;
+        alert('Cliente no encontrado. Por favor, seleccione un cliente válido.');
+        return;
     }
 
     trabajoData.valor = Number(trabajoData.valor) || 0;
@@ -213,12 +210,10 @@ function agregarTrabajo(event) {
 
     trabajoData.tipo = trabajoData.tipoValor === 'mantenimiento' ? 'Mantenimiento' : 'Incidente';
 
-    // Elimina campos innecesarios
     delete trabajoData.tipoValor;
     delete trabajoData.multiplicador;
     delete trabajoData.valorCalculado;
 
-    // Imprime los datos finales a enviar para depuración
     console.log('Datos finales a enviar:', JSON.stringify(trabajoData));
 
     fetch('/api/trabajos', {
@@ -226,24 +221,24 @@ function agregarTrabajo(event) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(trabajoData),
     })
-    .then(response => {
-        if (!response.ok) {
-            return response.text().then(text => {
-                throw new Error(`Error al agregar el trabajo: ${text}`);
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Trabajo agregado:', data);
-        cargarTrabajos();
-        event.target.reset();
-        limpiarCamposCalculados();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Ocurrió un error al agregar el trabajo. Por favor, intente de nuevo.');
-    });
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Error al agregar el trabajo: ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Trabajo agregado:', data);
+            cargarTrabajos();
+            event.target.reset();
+            limpiarCamposCalculados();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocurrió un error al agregar el trabajo. Por favor, intente de nuevo.');
+        });
 }
 
 
@@ -261,27 +256,27 @@ function eliminarTrabajo(id) {
         fetch(`/api/trabajos/${id}`, {
             method: 'DELETE'
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Trabajo eliminado:', data);
-            cargarTrabajos();
-        })
-        .catch(error => {
-            console.error('Error al eliminar el trabajo:', error);
-            alert('No se pudo eliminar el trabajo. Por favor, intente de nuevo.');
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Trabajo eliminado:', data);
+                cargarTrabajos();
+            })
+            .catch(error => {
+                console.error('Error al eliminar el trabajo:', error);
+                alert('No se pudo eliminar el trabajo. Por favor, intente de nuevo.');
+            });
     }
 }
 
 function filtrarTrabajos(event) {
     event.preventDefault();
     const mesSeleccionado = document.getElementById('mes').value;
-    
+
     if (!mesSeleccionado) {
         alert('Por favor, seleccione un mes para filtrar.');
         return;
@@ -299,7 +294,7 @@ function filtrarTrabajos(event) {
         .then(trabajos => {
             const tbody = document.getElementById('cuerpoTablaTrabajos');
             tbody.innerHTML = '';
-            
+
             if (trabajos.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="10">No se encontraron trabajos para el mes seleccionado.</td></tr>';
                 return;
