@@ -8,6 +8,7 @@ function initializePage() {
     const codigoClienteSelect = document.getElementById('codigoCliente');
     const tipoValorSelect = document.getElementById('tipoValor');
     const multiplicadorInput = document.getElementById('multiplicador');
+    const descargarExcelBtn = document.getElementById('descargarExcel');
 
     if (formularioTrabajo) {
         formularioTrabajo.addEventListener('submit', agregarTrabajo);
@@ -27,10 +28,61 @@ function initializePage() {
     if (multiplicadorInput) {
         multiplicadorInput.addEventListener('input', actualizarValorCalculado);
     }
+    if (descargarExcelBtn) {
+        descargarExcelBtn.addEventListener('click', descargarExcel);
+    }
 }
 
 let clientesData = [];
 let ciudadesData = [];
+
+
+// Agregar esta función auxiliar al principio del archivo
+function formatearFecha(fechaString) {
+    const [anio, mes, dia] = fechaString.split('-');
+    return `${dia}/${mes}/${anio}`;
+}
+
+function cargarTrabajos() {
+    Promise.all([
+        fetch('/api/clientes').then(response => response.json()),
+        fetch('/api/trabajos').then(response => response.json())
+    ])
+        .then(([clientes, trabajos]) => {
+            clientesData = clientes;
+            const tbody = document.getElementById('cuerpoTablaTrabajos');
+            tbody.innerHTML = '';
+            if (trabajos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10">No hay trabajos registrados.</td></tr>';
+                return;
+            }
+            trabajos.forEach(trabajo => {
+                const tr = document.createElement('tr');
+                const cliente = clientesData.find(c => c.codigo === trabajo.codigoCliente);
+                tr.innerHTML = `
+                <td data-label="Fecha">${formatearFecha(trabajo.fecha)}</td>
+                <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
+                <td data-label="Tipo">${trabajo.tipo}</td>
+                <td data-label="Cliente">${trabajo.codigoCliente}</td>
+                <td data-label="Ciudad">${cliente ? cliente.ciudad : 'N/A'}</td>
+                <td data-label="Valor">${formatearValorMoneda(trabajo.valor)}</td>
+                <td data-label="Viático">${formatearValorMoneda(trabajo.viatico)}</td>
+                <td data-label="Estacionamiento">${formatearValorMoneda(trabajo.estacionamiento)}</td>
+                <td data-label="Descripción">${trabajo.descripcion}</td>
+                <td data-label="Acciones">
+                    <button onclick="eliminarTrabajo('${trabajo._id}')">Eliminar</button>
+                </td>
+            `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(error => {
+            console.error('Error al cargar trabajos:', error);
+            const tbody = document.getElementById('cuerpoTablaTrabajos');
+            tbody.innerHTML = '<tr><td colspan="10">Error al cargar los trabajos. Por favor, intente de nuevo.</td></tr>';
+        });
+}
+
 
 function cargarCiudades() {
     fetch('/api/ciudades')
@@ -157,7 +209,7 @@ function cargarTrabajos() {
                 const tr = document.createElement('tr');
                 const cliente = clientesData.find(c => c.codigo === trabajo.codigoCliente);
                 tr.innerHTML = `
-                <td data-label="Fecha">${trabajo.fecha}</td>
+                <td data-label="Fecha">${formatearFecha(trabajo.fecha)}</td>
                 <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
                 <td data-label="Tipo">${trabajo.tipo}</td>
                 <td data-label="Cliente">${trabajo.codigoCliente}</td>
@@ -303,7 +355,7 @@ function filtrarTrabajos(event) {
                 const tr = document.createElement('tr');
                 const cliente = clientesData.find(c => c.codigo === trabajo.codigoCliente);
                 tr.innerHTML = `
-                    <td data-label="Fecha">${trabajo.fecha}</td>
+                    <td data-label="Fecha">${formatearFecha(trabajo.fecha)}</td>
                     <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
                     <td data-label="Tipo">${trabajo.tipo}</td>
                     <td data-label="Cliente">${trabajo.codigoCliente}</td>
@@ -327,6 +379,40 @@ function filtrarTrabajos(event) {
 
 function formatearValorMoneda(valor) {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(valor);
+}
+
+function descargarExcel() {
+    const mesSeleccionado = document.getElementById('mes').value;
+
+    if (!mesSeleccionado) {
+        alert('Por favor, seleccione un mes para descargar.');
+        return;
+    }
+
+    const [anio, mes] = mesSeleccionado.split('-');
+    const url = `/api/trabajos/excel?anio=${anio}&mes=${mes}`;
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al descargar el archivo Excel');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `trabajos-${anio}-${mes}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocurrió un error al descargar el archivo Excel. Por favor, intente de nuevo.');
+        });
 }
 
 document.addEventListener('DOMContentLoaded', initializePage);

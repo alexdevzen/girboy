@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+const Excel = require('exceljs');
 
 app.use(express.static(path.join(__dirname, '..')));
 app.use(express.json());
@@ -100,7 +101,7 @@ app.get('/api/trabajos', async (req, res) => {
     try {
         const db = await conectarDB();
         const trabajos = db.collection('trabajos');
-        
+
         const { anio, mes } = req.query;
         let query = {};
 
@@ -220,6 +221,67 @@ app.get('/api/ganancias', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+//Endpoint Excel
+app.get('/api/trabajos/excel', async (req, res) => {
+    try {
+        const { anio, mes } = req.query;
+        const db = await conectarDB();
+        const trabajos = db.collection('trabajos');
+        const clientes = db.collection('clientes');
+
+        const primerDiaMes = new Date(anio, mes - 1, 1);
+        const ultimoDiaMes = new Date(anio, mes, 0);
+
+        const query = {
+            fecha: {
+                $gte: primerDiaMes.toISOString().split('T')[0],
+                $lte: ultimoDiaMes.toISOString().split('T')[0]
+            }
+        };
+
+        const resultado = await trabajos.find(query).toArray();
+
+        // Crear un nuevo libro de trabajo y una hoja de cálculo
+        const workbook = new Excel.Workbook();
+        const worksheet = workbook.addWorksheet('Trabajos');
+
+        // Definir las columnas
+        worksheet.columns = [
+            { header: 'Fecha', key: 'fecha', width: 15 },
+            { header: 'Código', key: 'codigo', width: 15 },
+            { header: 'Tipo', key: 'tipo', width: 15 },
+            { header: 'Cliente', key: 'codigoCliente', width: 15 },
+            { header: 'Ciudad', key: 'ciudad', width: 15 },
+            { header: 'Valor', key: 'valor', width: 15 },
+            { header: 'Viático', key: 'viatico', width: 15 },
+            { header: 'Estacionamiento', key: 'estacionamiento', width: 15 },
+            { header: 'Descripción', key: 'descripcion', width: 30 }
+        ];
+
+        // Agregar los datos
+        for (const trabajo of resultado) {
+            const cliente = await clientes.findOne({ codigo: trabajo.codigoCliente });
+            worksheet.addRow({
+                ...trabajo,
+                ciudad: cliente ? cliente.ciudad : 'N/A'
+            });
+        }
+
+        // Configurar la respuesta
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=trabajos-${anio}-${mes}.xlsx`);
+
+        // Escribir a la respuesta
+        await workbook.xlsx.write(res);
+        res.end();
+
+    } catch (error) {
+        console.error('Error al generar Excel:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 //middleware de manejo de errores
 app.use((err, req, res, next) => {

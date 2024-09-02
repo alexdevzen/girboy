@@ -21,7 +21,7 @@ let graficoGanancias; // Variable global para mantener la referencia al gráfico
 
 function cargarGraficoGanancias() {
     const año = document.getElementById('añoGanancias').value || new Date().getFullYear();
-    
+
     fetch(`/api/ganancias?año=${año}`)
         .then(response => response.json())
         .then(ganancias => {
@@ -50,7 +50,7 @@ function cargarGraficoGanancias() {
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                callback: function(value, index, values) {
+                                callback: function (value, index, values) {
                                     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(value);
                                 }
                             }
@@ -59,7 +59,7 @@ function cargarGraficoGanancias() {
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     let label = context.dataset.label || '';
                                     if (label) {
                                         label += ': ';
@@ -117,7 +117,7 @@ function cargarListaTrabajos(anio, mes) {
 function filtrarTrabajos(event) {
     event.preventDefault();
     const mesSeleccionado = document.getElementById('mes').value;
-    
+
     if (!mesSeleccionado) {
         alert('Por favor, seleccione un mes para filtrar.');
         return;
