@@ -2,11 +2,9 @@ document.addEventListener('DOMContentLoaded', function () {
     cargarClientes();
     document.getElementById('formularioCliente').addEventListener('submit', agregarCliente);
     document.getElementById('formularioEditarCliente').addEventListener('submit', actualizarCliente);
-    document.getElementById('cerrarModal').addEventListener('click', () => {
-        document.getElementById('modalEditarCliente').close();
-    });
+    document.getElementById('cerrarModal').addEventListener('click', cerrarModalEdicion);
 
-    // Agregar event listeners para actualizar los valores formateados
+    // Event listeners para formateo en tiempo real
     ['valorMantenimiento', 'valorIncidente', 'viatico', 'estacionamiento'].forEach(campo => {
         document.getElementById(campo).addEventListener('input', actualizarValorFormateado);
         document.getElementById('edit' + campo.charAt(0).toUpperCase() + campo.slice(1)).addEventListener('input', actualizarValorFormateado);
@@ -19,13 +17,17 @@ function formatearValorMoneda(valor) {
 
 function actualizarValorFormateado(event) {
     const campo = event.target;
+    const valor = parseFloat(campo.value) || 0;
     const valorFormateado = document.getElementById(campo.id + 'Formatted');
-    valorFormateado.textContent = formatearValorMoneda(campo.value);
+    valorFormateado.textContent = formatearValorMoneda(valor);
 }
 
 function cargarClientes() {
     fetch('/api/clientes')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Error al cargar los clientes');
+            return response.json();
+        })
         .then(clientes => {
             const tbody = document.getElementById('cuerpoTablaClientes');
             tbody.innerHTML = '';
@@ -41,14 +43,17 @@ function cargarClientes() {
                     <td data-label="Viático">${formatearValorMoneda(cliente.viatico)}</td>
                     <td data-label="Estacionamiento">${formatearValorMoneda(cliente.estacionamiento)}</td>
                     <td data-label="Acciones">
-                        <button onclick="editarCliente('${cliente._id}')">Editar</button>
-                        <button onclick="eliminarCliente('${cliente._id}')">Eliminar</button>
+                        <button onclick="editarCliente('${cliente._id}')" class="btn-editar">Editar</button>
+                        <button onclick="eliminarCliente('${cliente._id}')" class="btn-eliminar">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocurrió un error al cargar los clientes. Por favor, recargue la página.');
+        });
 }
 
 function agregarCliente(event) {
@@ -56,42 +61,45 @@ function agregarCliente(event) {
     const formData = new FormData(event.target);
     const clienteData = Object.fromEntries(formData.entries());
 
-    // Asegurarse de que los valores monetarios sean números
+    if (!validarDatosCliente(clienteData)) {
+        alert('Por favor, complete todos los campos requeridos.');
+        return;
+    }
+
+    // Convertir valores monetarios a números
     ['valorMantenimiento', 'valorIncidente', 'viatico', 'estacionamiento'].forEach(campo => {
-        clienteData[campo] = parseInt(clienteData[campo], 10);
+        clienteData[campo] = parseFloat(clienteData[campo]) || 0;
     });
 
     fetch('/api/clientes', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(clienteData),
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Cliente agregado:', data);
-            cargarClientes();
-            event.target.reset();
-            // Limpiar los valores formateados
-            ['valorMantenimiento', 'valorIncidente', 'viatico', 'estacionamiento'].forEach(campo => {
-                document.getElementById(campo + 'Formatted').textContent = '';
-            });
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+    .then(response => {
+        if (!response.ok) throw new Error('Error al agregar el cliente');
+        return response.json();
+    })
+    .then(data => {
+        console.log('Cliente agregado:', data);
+        cargarClientes();
+        resetearFormulario(event.target);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ocurrió un error al agregar el cliente. Por favor, intente de nuevo.');
+    });
 }
 
 function editarCliente(id) {
     fetch(`/api/clientes/${id}`)
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error('Error al cargar los datos del cliente');
             return response.json();
         })
         .then(cliente => {
+            if (!cliente) throw new Error('Cliente no encontrado');
+            
             document.getElementById('editId').value = cliente._id;
             document.getElementById('editCodigo').value = cliente.codigo;
             document.getElementById('editCliente').value = cliente.cliente;
@@ -102,7 +110,6 @@ function editarCliente(id) {
             document.getElementById('editViatico').value = cliente.viatico;
             document.getElementById('editEstacionamiento').value = cliente.estacionamiento;
             
-            // Actualizar los valores formateados
             ['ValorMantenimiento', 'ValorIncidente', 'Viatico', 'Estacionamiento'].forEach(campo => {
                 actualizarValorFormateado({ target: document.getElementById('edit' + campo) });
             });
@@ -110,7 +117,7 @@ function editarCliente(id) {
             document.getElementById('modalEditarCliente').showModal();
         })
         .catch(error => {
-            console.error('Error al cargar el cliente:', error);
+            console.error('Error:', error);
             alert('No se pudo cargar la información del cliente. Por favor, intente de nuevo.');
         });
 }
@@ -122,47 +129,70 @@ function actualizarCliente(event) {
     const id = clienteData.id;
     delete clienteData.id;
 
-    // Asegurarse de que los valores monetarios sean números
+    if (!validarDatosCliente(clienteData)) {
+        alert('Por favor, complete todos los campos requeridos.');
+        return;
+    }
+
+    // Convertir valores monetarios a números
     ['valorMantenimiento', 'valorIncidente', 'viatico', 'estacionamiento'].forEach(campo => {
-        clienteData[campo] = parseInt(clienteData[campo], 10);
+        clienteData[campo] = parseFloat(clienteData[campo]) || 0;
     });
 
     fetch(`/api/clientes/${id}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(clienteData),
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Cliente actualizado:', data);
-            cargarClientes();
-            document.getElementById('modalEditarCliente').close();
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+    .then(response => {
+        if (!response.ok) throw new Error('Error al actualizar el cliente');
+        return response.json();
+    })
+    .then(data => {
+        console.log('Cliente actualizado:', data);
+        cargarClientes();
+        cerrarModalEdicion();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ocurrió un error al actualizar el cliente. Por favor, intente de nuevo.');
+    });
 }
 
 function eliminarCliente(id) {
     if (confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
-        fetch(`/api/clientes/${id}`, {
-            method: 'DELETE'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Cliente eliminado:', data);
-            cargarClientes(); // Recargar la lista de clientes
-        })
-        .catch(error => {
-            console.error('Error al eliminar el cliente:', error);
-            alert('No se pudo eliminar el cliente. Por favor, intente de nuevo.');
-        });
+        fetch(`/api/clientes/${id}`, { method: 'DELETE' })
+            .then(response => {
+                if (!response.ok) throw new Error('Error al eliminar el cliente');
+                return response.json();
+            })
+            .then(data => {
+                console.log('Cliente eliminado:', data);
+                cargarClientes();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('No se pudo eliminar el cliente. Por favor, intente de nuevo.');
+            });
     }
+}
+
+function cerrarModalEdicion() {
+    document.getElementById('modalEditarCliente').close();
+}
+
+function limpiarCamposFormateados() {
+    ['valorMantenimiento', 'valorIncidente', 'viatico', 'estacionamiento'].forEach(campo => {
+        document.getElementById(campo + 'Formatted').textContent = '';
+    });
+}
+
+function resetearFormulario(formulario) {
+    formulario.reset();
+    limpiarCamposFormateados();
+}
+
+function validarDatosCliente(clienteData) {
+    const camposRequeridos = ['codigo', 'cliente', 'direccion', 'ciudad'];
+    return camposRequeridos.every(campo => clienteData[campo] && clienteData[campo].trim() !== '');
 }

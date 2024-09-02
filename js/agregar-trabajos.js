@@ -1,36 +1,36 @@
-document.addEventListener('DOMContentLoaded', function () {
+function initializePage() {
     cargarTrabajos();
-    document.getElementById('formularioFiltro').addEventListener('submit', filtrarTrabajos);
     cargarCiudades();
-    document.getElementById('formularioTrabajo').addEventListener('submit', agregarTrabajo);
     
-    // Eventos para actualizar valores
-    document.getElementById('ciudad').addEventListener('change', function() {
-        cargarClientesPorCiudad();
-        // Resetear la selección del cliente
-        document.getElementById('codigoCliente').value = '';
-        // Limpiar los campos relacionados con el cliente
-        document.getElementById('viatico').value = '';
-        document.getElementById('estacionamiento').value = '';
-        document.getElementById('valorCalculado').value = '';
-    });
-    document.getElementById('codigoCliente').addEventListener('change', actualizarValoresCliente);
-    document.getElementById('tipoValor').addEventListener('change', actualizarValorCalculado);
-    document.getElementById('multiplicador').addEventListener('input', actualizarValorCalculado);
+    const formularioTrabajo = document.getElementById('formularioTrabajo');
+    const formularioFiltro = document.getElementById('formularioFiltro');
+    const ciudadSelect = document.getElementById('ciudad');
+    const codigoClienteSelect = document.getElementById('codigoCliente');
+    const tipoValorSelect = document.getElementById('tipoValor');
+    const multiplicadorInput = document.getElementById('multiplicador');
 
-    // Mostrar/ocultar el campo multiplicador
-    document.getElementById('tipoValor').addEventListener('change', function() {
-        const multiplicadorGroup = document.getElementById('multiplicadorGroup');
-        multiplicadorGroup.style.display = this.value === 'incidente' ? 'block' : 'none';
-        if (this.value !== 'incidente') {
-            document.getElementById('multiplicador').value = 1;
-        }
-    });
-});
+    if (formularioTrabajo) {
+        formularioTrabajo.addEventListener('submit', agregarTrabajo);
+    }
+    if (formularioFiltro) {
+        formularioFiltro.addEventListener('submit', filtrarTrabajos);
+    }
+    if (ciudadSelect) {
+        ciudadSelect.addEventListener('change', cargarClientesPorCiudad);
+    }
+    if (codigoClienteSelect) {
+        codigoClienteSelect.addEventListener('change', actualizarValoresCliente);
+    }
+    if (tipoValorSelect) {
+        tipoValorSelect.addEventListener('change', manejarCambioTipoValor);
+    }
+    if (multiplicadorInput) {
+        multiplicadorInput.addEventListener('input', actualizarValorCalculado);
+    }
+}
 
 let clientesData = [];
 let ciudadesData = [];
-
 
 function cargarCiudades() {
     fetch('/api/ciudades')
@@ -38,6 +38,7 @@ function cargarCiudades() {
         .then(ciudades => {
             ciudadesData = ciudades;
             const selectCiudad = document.getElementById('ciudad');
+            selectCiudad.innerHTML = '<option value="">Seleccione una ciudad</option>';
             ciudades.forEach(ciudad => {
                 const option = document.createElement('option');
                 option.value = ciudad;
@@ -48,14 +49,29 @@ function cargarCiudades() {
         .catch(error => console.error('Error al cargar las ciudades:', error));
 }
 
-
 function cargarClientesPorCiudad() {
     const ciudadSeleccionada = document.getElementById('ciudad').value;
-    fetch(`/api/clientes${ciudadSeleccionada ? `?ciudad=${encodeURIComponent(ciudadSeleccionada)}` : ''}`)
-        .then(response => response.json())
+    const selectCliente = document.getElementById('codigoCliente');
+    
+    if (!selectCliente) {
+        console.error('Elemento codigoCliente no encontrado');
+        return;
+    }
+
+    if (!ciudadSeleccionada) {
+        selectCliente.innerHTML = '<option value="">Seleccione un cliente</option>';
+        return;
+    }
+
+    fetch(`/api/clientes?ciudad=${encodeURIComponent(ciudadSeleccionada)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al cargar los clientes');
+            }
+            return response.json();
+        })
         .then(clientes => {
             clientesData = clientes;
-            const selectCliente = document.getElementById('codigoCliente');
             selectCliente.innerHTML = '<option value="">Seleccione un cliente</option>';
             clientes.forEach(cliente => {
                 const option = document.createElement('option');
@@ -64,38 +80,41 @@ function cargarClientesPorCiudad() {
                 selectCliente.appendChild(option);
             });
         })
-        .catch(error => console.error('Error al cargar los clientes:', error));
-}
-
-
-function cargarCodigosClientes() {
-    fetch('/api/clientes')
-        .then(response => response.json())
-        .then(clientes => {
-            clientesData = clientes;
-            const select = document.getElementById('codigoCliente');
-            clientes.forEach(cliente => {
-                const option = document.createElement('option');
-                option.value = cliente.codigo;
-                option.textContent = `${cliente.codigo} - ${cliente.cliente}`;
-                select.appendChild(option);
-            });
-        })
-        .catch(error => console.error('Error al cargar los códigos de clientes:', error));
+        .catch(error => {
+            console.error('Error al cargar los clientes:', error);
+            alert('Hubo un error al cargar los clientes. Por favor, intente de nuevo.');
+        });
 }
 
 function actualizarValoresCliente() {
     const codigoCliente = document.getElementById('codigoCliente').value;
     const cliente = clientesData.find(c => c.codigo === codigoCliente);
+
+    // Actualiza los valores si el cliente existe
     if (cliente) {
-        document.getElementById('viatico').value = cliente.viatico.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' });
+        document.getElementById('viatico').value = cliente.viatico;
+        const viaticoFormatted = document.getElementById('viaticoFormatted');
+        if (viaticoFormatted) {
+            viaticoFormatted.textContent = formatearValorMoneda(cliente.viatico);
+        }
         document.getElementById('estacionamiento').value = cliente.estacionamiento;
+        const estacionamientoFormatted = document.getElementById('estacionamientoFormatted');
+        if (estacionamientoFormatted) {
+            estacionamientoFormatted.textContent = formatearValorMoneda(cliente.estacionamiento);
+        }
         actualizarValorCalculado();
     } else {
-        document.getElementById('viatico').value = '';
-        document.getElementById('estacionamiento').value = '';
-        document.getElementById('valorCalculado').value = '';
+        limpiarCamposCalculados();
     }
+}
+
+
+function manejarCambioTipoValor() {
+    const tipoValor = document.getElementById('tipoValor').value;
+    const multiplicadorGroup = document.getElementById('multiplicadorGroup');
+    multiplicadorGroup.style.display = tipoValor === 'incidente' ? 'block' : 'none';
+    document.getElementById('multiplicador').value = tipoValor === 'incidente' ? '' : '1';
+    actualizarValorCalculado();
 }
 
 function actualizarValorCalculado() {
@@ -113,57 +132,48 @@ function actualizarValorCalculado() {
         valor = cliente.valorIncidente * multiplicador;
     }
 
-    document.getElementById('valorCalculado').value = valor.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' });
+    // Actualiza el valor calculado
+    const valorCalculado = document.getElementById('valorCalculado');
+    if (valorCalculado) {
+        valorCalculado.value = valor;
+        const valorCalculadoFormatted = document.getElementById('valorCalculadoFormatted');
+        if (valorCalculadoFormatted) {
+            valorCalculadoFormatted.textContent = formatearValorMoneda(valor);
+        }
+    }
 }
 
+
 function cargarTrabajos() {
-// Primero, cargar todos los clientes
-fetch('/api/clientes')
-.then(response => response.json())
-.then(clientes => {
-    clientesData = clientes;
-
-// Ahora cargar los trabajos
-    return fetch('/api/trabajos');
-})
-        .then(response => response.json())
-        .then(trabajos => {
-            const tbody = document.getElementById('cuerpoTablaTrabajos');
-            tbody.innerHTML = '';
-            trabajos.forEach(trabajo => {
-                const tr = document.createElement('tr');
-                const valorFormateado = trabajo.valor !== undefined && !isNaN(trabajo.valor)
-                    ? trabajo.valor.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
-                    : 'N/A';
-                const viaticoFormateado = trabajo.viatico !== undefined && !isNaN(trabajo.viatico)
-                    ? trabajo.viatico.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
-                    : 'N/A';
-                const estacionamientoFormateado = trabajo.estacionamiento !== undefined && !isNaN(trabajo.estacionamiento)
-                    ? trabajo.estacionamiento.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
-                    : 'N/A';
-                
-                // Obtener la ciudad del cliente
-                const cliente = clientesData.find(c => c.codigo === trabajo.codigoCliente);
-                const ciudadCliente = cliente ? cliente.ciudad : 'N/A';
-
-                tr.innerHTML = `
-                    <td data-label="Fecha">${trabajo.fecha}</td>
+    Promise.all([
+        fetch('/api/clientes').then(response => response.json()),
+        fetch('/api/trabajos').then(response => response.json())
+    ])
+    .then(([clientes, trabajos]) => {
+        clientesData = clientes;
+        const tbody = document.getElementById('cuerpoTablaTrabajos');
+        tbody.innerHTML = '';
+        trabajos.forEach(trabajo => {
+            const tr = document.createElement('tr');
+            const cliente = clientesData.find(c => c.codigo === trabajo.codigoCliente);
+            tr.innerHTML = `
+                <td data-label="Fecha">${trabajo.fecha}</td>
                 <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
                 <td data-label="Tipo">${trabajo.tipo}</td>
                 <td data-label="Cliente">${trabajo.codigoCliente}</td>
-                <td data-label="Ciudad">${ciudadCliente}</td>
-                <td data-label="Valor">${valorFormateado}</td>
-                <td data-label="Viático">${viaticoFormateado}</td>
-                <td data-label="Estacionamiento">${estacionamientoFormateado}</td>
+                <td data-label="Ciudad">${cliente ? cliente.ciudad : 'N/A'}</td>
+                <td data-label="Valor">${formatearValorMoneda(trabajo.valor)}</td>
+                <td data-label="Viático">${formatearValorMoneda(trabajo.viatico)}</td>
+                <td data-label="Estacionamiento">${formatearValorMoneda(trabajo.estacionamiento)}</td>
                 <td data-label="Descripción">${trabajo.descripcion}</td>
                 <td data-label="Acciones">
                     <button onclick="eliminarTrabajo('${trabajo._id}')">Eliminar</button>
                 </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        })
-        .catch(error => console.error('Error:', error));
+            `;
+            tbody.appendChild(tr);
+        });
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 function agregarTrabajo(event) {
@@ -171,17 +181,27 @@ function agregarTrabajo(event) {
     const formData = new FormData(event.target);
     const trabajoData = Object.fromEntries(formData.entries());
 
+    // Imprime los datos para depuración
+    console.log('Datos del formulario:', trabajoData);
+
+    // Verifica y limpia los datos antes de enviarlos
     if (!trabajoData.codigo) {
         delete trabajoData.codigo;
     }
 
+    // Verifica si el cliente está seleccionado
+    if (!trabajoData.codigoCliente) {
+        alert('Por favor, seleccione un cliente.');
+        return;
+    }
+
+    // Calcula el valor y el viático si el cliente está presente
     const cliente = clientesData.find(c => c.codigo === trabajoData.codigoCliente);
     if (cliente) {
         trabajoData.valor = trabajoData.tipoValor === 'mantenimiento' 
             ? cliente.valorMantenimiento 
             : cliente.valorIncidente * parseInt(trabajoData.multiplicador || 1);
         trabajoData.viatico = cliente.viatico;
-        // El estacionamiento se toma del campo editable, no del cliente
     } else {
         trabajoData.valor = 0;
         trabajoData.viatico = 0;
@@ -191,30 +211,49 @@ function agregarTrabajo(event) {
     trabajoData.viatico = Number(trabajoData.viatico) || 0;
     trabajoData.estacionamiento = Number(trabajoData.estacionamiento) || 0;
 
+    trabajoData.tipo = trabajoData.tipoValor === 'mantenimiento' ? 'Mantenimiento' : 'Incidente';
+
+    // Elimina campos innecesarios
     delete trabajoData.tipoValor;
     delete trabajoData.multiplicador;
     delete trabajoData.valorCalculado;
 
+    // Imprime los datos finales a enviar para depuración
+    console.log('Datos finales a enviar:', JSON.stringify(trabajoData));
+
     fetch('/api/trabajos', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(trabajoData),
     })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Trabajo agregado:', data);
-            cargarTrabajos();
-            event.target.reset();
-            document.getElementById('valorCalculado').value = '';
-            document.getElementById('viatico').value = '';
-            document.getElementById('estacionamiento').value = '';
-            document.getElementById('multiplicadorGroup').style.display = 'none';
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Error al agregar el trabajo: ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Trabajo agregado:', data);
+        cargarTrabajos();
+        event.target.reset();
+        limpiarCamposCalculados();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ocurrió un error al agregar el trabajo. Por favor, intente de nuevo.');
+    });
+}
+
+
+function limpiarCamposCalculados() {
+    ['valorCalculado', 'viatico', 'estacionamiento'].forEach(campo => {
+        document.getElementById(campo).value = '';
+        const formatted = document.getElementById(campo + 'Formatted');
+        if (formatted) formatted.textContent = '';
+    });
+    document.getElementById('multiplicadorGroup').style.display = 'none';
 }
 
 function eliminarTrabajo(id) {
@@ -230,7 +269,7 @@ function eliminarTrabajo(id) {
         })
         .then(data => {
             console.log('Trabajo eliminado:', data);
-            cargarTrabajos(); // Recargar la lista de trabajos
+            cargarTrabajos();
         })
         .catch(error => {
             console.error('Error al eliminar el trabajo:', error);
@@ -265,31 +304,18 @@ function filtrarTrabajos(event) {
                 tbody.innerHTML = '<tr><td colspan="10">No se encontraron trabajos para el mes seleccionado.</td></tr>';
                 return;
             }
-            // Aquí pegamos el código que rellena la tabla
             trabajos.forEach(trabajo => {
                 const tr = document.createElement('tr');
-                const valorFormateado = trabajo.valor !== undefined && !isNaN(trabajo.valor)
-                    ? trabajo.valor.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
-                    : 'N/A';
-                const viaticoFormateado = trabajo.viatico !== undefined && !isNaN(trabajo.viatico)
-                    ? trabajo.viatico.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
-                    : 'N/A';
-                const estacionamientoFormateado = trabajo.estacionamiento !== undefined && !isNaN(trabajo.estacionamiento)
-                    ? trabajo.estacionamiento.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
-                    : 'N/A';
-                
                 const cliente = clientesData.find(c => c.codigo === trabajo.codigoCliente);
-                const ciudadCliente = cliente ? cliente.ciudad : 'N/A';
-
                 tr.innerHTML = `
                     <td data-label="Fecha">${trabajo.fecha}</td>
                     <td data-label="Código">${trabajo.codigo || 'N/A'}</td>
                     <td data-label="Tipo">${trabajo.tipo}</td>
                     <td data-label="Cliente">${trabajo.codigoCliente}</td>
-                    <td data-label="Ciudad">${ciudadCliente}</td>
-                    <td data-label="Valor">${valorFormateado}</td>
-                    <td data-label="Viático">${viaticoFormateado}</td>
-                    <td data-label="Estacionamiento">${estacionamientoFormateado}</td>
+                    <td data-label="Ciudad">${cliente ? cliente.ciudad : 'N/A'}</td>
+                    <td data-label="Valor">${formatearValorMoneda(trabajo.valor)}</td>
+                    <td data-label="Viático">${formatearValorMoneda(trabajo.viatico)}</td>
+                    <td data-label="Estacionamiento">${formatearValorMoneda(trabajo.estacionamiento)}</td>
                     <td data-label="Descripción">${trabajo.descripcion}</td>
                     <td data-label="Acciones">
                         <button onclick="eliminarTrabajo('${trabajo._id}')">Eliminar</button>
@@ -303,3 +329,9 @@ function filtrarTrabajos(event) {
             alert('Hubo un error al filtrar los trabajos. Por favor, intente de nuevo.');
         });
 }
+
+function formatearValorMoneda(valor) {
+    return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(valor);
+}
+
+document.addEventListener('DOMContentLoaded', initializePage);

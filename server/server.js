@@ -94,7 +94,7 @@ app.get('/api/clientes/:id', async (req, res) => {
     }
 });
 
-// Rutas para trabajos
+
 // Rutas para trabajos
 app.get('/api/trabajos', async (req, res) => {
     try {
@@ -147,12 +147,12 @@ app.post('/api/trabajos', async (req, res) => {
 
         const nuevoTrabajo = {
             fecha: req.body.fecha,
-            tipo: req.body.tipo,
+            tipo: req.body.tipo, // Esto ya vendrá como 'Mantenimiento' o 'Incidente' del cliente
             codigoCliente: req.body.codigoCliente,
             descripcion: req.body.descripcion,
             valor: req.body.valor,
             viatico: req.body.viatico,
-            estacionamiento: req.body.estacionamiento, // Aseguramos que se incluya el campo de estacionamiento
+            estacionamiento: req.body.estacionamiento,
             ...(req.body.codigo && { codigo: req.body.codigo })
         };
 
@@ -171,6 +171,51 @@ app.delete('/api/trabajos/:id', async (req, res) => {
         const id = req.params.id;
         const resultado = await trabajos.deleteOne({ _id: new ObjectId(id) });
         res.json(resultado);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+//Ruta para ganancias
+// Añade esta nueva ruta en server.js
+app.get('/api/ganancias', async (req, res) => {
+    try {
+        const db = await conectarDB();
+        const trabajos = db.collection('trabajos');
+
+        // Obtener el año actual si no se proporciona
+        const año = parseInt(req.query.año) || new Date().getFullYear();
+
+        // Agregación para calcular ganancias mensuales
+        const resultado = await trabajos.aggregate([
+            {
+                $match: {
+                    fecha: {
+                        $gte: `${año}-01-01`,
+                        $lte: `${año}-12-31`
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $substr: ['$fecha', 5, 2] }, // Mes
+                    ganancias: { $sum: '$valor' }
+                }
+            },
+            {
+                $sort: { _id: 1 }
+            }
+        ]).toArray();
+
+        // Crear un array de 12 meses con ganancias
+        const gananciasmensuales = Array(12).fill(0);
+        resultado.forEach(item => {
+            const mes = parseInt(item._id) - 1; // Restamos 1 porque los meses en JavaScript van de 0 a 11
+            gananciasmensuales[mes] = item.ganancias;
+        });
+
+        res.json(gananciasmensuales);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
