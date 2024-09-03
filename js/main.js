@@ -50,7 +50,7 @@ function cargarGraficoGanancias() {
                 data: {
                     labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
                     datasets: [{
-                        label: 'Ganancias Mensuales',
+                        label: 'Ingresos Mensuales',
                         data: ganancias,
                         borderColor: 'rgb(75, 192, 192)',
                         tension: 0.1
