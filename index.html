@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -18,17 +18,18 @@
         </nav>
         <main>
             <h1>Dashboard</h1>
-
-            <section class="card">
+            <section class="card ingresos-mensuales">
                 <h2>Ingresos Mensuales</h2>
-                <div>
+                <div class="form-group">
                     <label for="añoGanancias">Seleccionar año:</label>
                     <select id="añoGanancias"></select>
                 </div>
-                <canvas id="graficoGanancias"></canvas>
+                <div class="ingresos-chart-container">
+                    <canvas id="graficoIngresos"></canvas>
+                </div>
+                <div id="ingresosResumen"></div>
             </section>
-
-            <section class="card">
+            <section class="card filtrar-trabajos">
                 <h2>Filtrar Trabajos</h2>
                 <form id="formularioFiltro">
                     <div class="form-group">
@@ -38,8 +39,7 @@
                     <button type="submit">Filtrar</button>
                 </form>
             </section>
-
-            <section class="card">
+            <section class="card lista-trabajos">
                 <h2>Lista de Trabajos</h2>
                 <div class="table-responsive">
                     <table>
@@ -56,14 +56,12 @@
                                 <th>Descripción</th>
                             </tr>
                         </thead>
-                        <tbody id="cuerpoTablaTrabajosListado">
-                        </tbody>
+                        <tbody id="cuerpoTablaTrabajosListado"></tbody>
                     </table>
                 </div>
             </section>
         </main>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./js/main.js"></script>
 </body>
 </html>
