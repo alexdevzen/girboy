@@ -2,7 +2,7 @@
  * Inicializa la página cuando el DOM está completamente cargado
  */
 document.addEventListener('DOMContentLoaded', function () {
-    cargarClientes();
+     cargarClientes();
     document.getElementById('formularioCliente').addEventListener('submit', agregarCliente);
     document.getElementById('formularioEditarCliente').addEventListener('submit', actualizarCliente);
     document.getElementById('cerrarModal').addEventListener('click', cerrarModalEdicion);
@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('edit' + campo.charAt(0).toUpperCase() + campo.slice(1)).addEventListener('input', actualizarValorFormateado);
     });
 });
+
+
 
 /**
  * Formatea un valor numérico a formato de moneda chilena
@@ -34,6 +36,9 @@ function actualizarValorFormateado(event) {
     valorFormateado.textContent = formatearValorMoneda(valor);
 }
 
+/**
+ * Carga y muestra la lista de clientes
+ */
 /**
  * Carga y muestra la lista de clientes
  */

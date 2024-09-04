@@ -1,76 +1,69 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <!-- Asegúrate de incluir la librería de Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/styles.css">
 </head>
-
 <body>
-    <header>
-        <nav>
+    <div class="container">
+        <nav class="sidebar">
             <ul>
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="agregar-trabajos.html">Agregar Trabajos</a></li>
                 <li><a href="gestionar-clientes.html">Gestionar Clientes</a></li>
             </ul>
         </nav>
-    </header>
+        <main>
+            <h1>Dashboard</h1>
 
-    <main>
-        <h1>Dashboard</h1>
-
-        <!-- Sección para mostrar los ingresos mensuales -->
-        <section class="card">
-            <h2>Ingresos Mensuales</h2>
-            <div>
-                <label for="añoGanancias">Seleccionar año:</label>
-                <select id="añoGanancias"></select>
-            </div>
-            <canvas id="graficoGanancias"></canvas>
-        </section>
-
-        <!-- Sección para filtrar trabajos -->
-        <section class="card">
-            <h2>Filtrar Trabajos</h2>
-            <form id="formularioFiltro">
-                <div class="form-group">
-                    <label for="mes">Mes:</label>
-                    <input type="month" id="mes" name="mes" required>
+            <section class="card">
+                <h2>Ingresos Mensuales</h2>
+                <div>
+                    <label for="añoGanancias">Seleccionar año:</label>
+                    <select id="añoGanancias"></select>
                 </div>
-                <button type="submit">Filtrar</button>
-            </form>
-        </section>
+                <canvas id="graficoGanancias"></canvas>
+            </section>
 
-        <!-- Sección para mostrar la lista de trabajos -->
-        <section class="card">
-            <h2>Lista de Trabajos</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Código</th>
-                        <th>Tipo</th>
-                        <th>Cliente</th>
-                        <th>Ciudad</th>
-                        <th>Valor</th>
-                        <th>Viático</th>
-                        <th>Estacionamiento</th>
-                        <th>Descripción</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpoTablaTrabajosListado">
-                    <!-- Los trabajos se cargarán dinámicamente aquí -->
-                </tbody>
-            </table>
-        </section>
-    </main>
+            <section class="card">
+                <h2>Filtrar Trabajos</h2>
+                <form id="formularioFiltro">
+                    <div class="form-group">
+                        <label for="mes">Mes:</label>
+                        <input type="month" id="mes" name="mes" required>
+                    </div>
+                    <button type="submit">Filtrar</button>
+                </form>
+            </section>
 
-    <script src="js/main.js"></script>
+            <section class="card">
+                <h2>Lista de Trabajos</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Código</th>
+                                <th>Tipo</th>
+                                <th>Cliente</th>
+                                <th>Ciudad</th>
+                                <th>Valor</th>
+                                <th>Viático</th>
+                                <th>Estacionamiento</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoTablaTrabajosListado">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./js/main.js"></script>
 </body>
-
 </html>
