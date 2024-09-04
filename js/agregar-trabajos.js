@@ -19,6 +19,8 @@ function initializePage() {
         'codigoCliente': ['change', actualizarValoresCliente],
         'tipoValor': ['change', manejarCambioTipoValor],
         'multiplicador': ['input', actualizarValorCalculado],
+        'viatico': ['input', actualizarValorFormateado],
+        'estacionamiento': ['input', actualizarValorFormateado],
         'descargarExcel': ['click', descargarExcel]
     };
 
@@ -152,15 +154,22 @@ function actualizarValoresCliente() {
         document.getElementById('viatico').value = cliente.viatico;
         document.getElementById('estacionamiento').value = cliente.estacionamiento;
         ['viatico', 'estacionamiento'].forEach(campo => {
-            const elementoFormateado = document.getElementById(`${campo}Formatted`);
-            if (elementoFormateado) {
-                elementoFormateado.textContent = formatearValorMoneda(cliente[campo]);
-            }
+            actualizarValorFormateado({ target: document.getElementById(campo) });
         });
         actualizarValorCalculado();
     } else {
         limpiarCamposCalculados();
     }
+}
+
+/**
+ * Actualiza el valor formateado para viático y estacionamiento
+ */
+function actualizarValorFormateado(event) {
+    const campo = event.target;
+    const valor = parseFloat(campo.value) || 0;
+    const valorFormateado = document.getElementById(`${campo.id}Formatted`);
+    valorFormateado.textContent = formatearValorMoneda(valor);
 }
 
 /**
@@ -222,16 +231,15 @@ function agregarTrabajo(event) {
         trabajoData.valor = trabajoData.tipoValor === 'mantenimiento'
             ? cliente.valorMantenimiento
             : cliente.valorIncidente * parseInt(trabajoData.multiplicador || 1);
-        trabajoData.viatico = cliente.viatico;
-        trabajoData.estacionamiento = cliente.estacionamiento;
+        // Usar los valores ingresados por el usuario para viático y estacionamiento
+        trabajoData.viatico = parseFloat(trabajoData.viatico) || 0;
+        trabajoData.estacionamiento = parseFloat(trabajoData.estacionamiento) || 0;
     } else {
         alert('Cliente no encontrado. Por favor, seleccione un cliente válido.');
         return;
     }
 
     trabajoData.valor = Number(trabajoData.valor) || 0;
-    trabajoData.viatico = Number(trabajoData.viatico) || 0;
-    trabajoData.estacionamiento = Number(trabajoData.estacionamiento) || 0;
 
     trabajoData.tipo = trabajoData.tipoValor === 'mantenimiento' ? 'Mantenimiento' : 'Incidente';
 
