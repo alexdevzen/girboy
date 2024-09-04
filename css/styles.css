@@ -1,205 +1,194 @@
-/* Variables globales */
-:root {
-    --primary-color: #3498db;
-    --secondary-color: #2c3e50;
-    --background-color: #f4f4f4;
-    --text-color: #333;
-    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    --transition-speed: 0.3s;
-}
+/* Estilos globales - Moderno y Minimalista */
 
-/* Estilos base */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2c3e50;
+  --background-color: #f8f9fa;
+  --text-color: #333;
+  --border-radius: 4px;
+  --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 body {
-    font-family: 'Roboto', Arial, sans-serif;
-    line-height: 1.6;
-    color: var(--text-color);
-    background-color: var(--background-color);
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.3;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  margin: 0;
+  padding: 0;
 }
 
-/* Estilos del encabezado y navegación */
-header {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 1rem;
-    box-shadow: var(--shadow);
+/* Layout */
+.container {
+  display: flex;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
-nav ul {
-    list-style-type: none;
-    display: flex;
-    justify-content: flex-start;
-}
-
-nav ul li {
-    margin-right: 20px;
-}
-
-nav ul li a {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    transition: opacity var(--transition-speed) ease;
-}
-
-nav ul li a:hover {
-    opacity: 0.8;
-}
-
-/* Estilos del contenido principal */
 main {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 20px;
+  flex-grow: 1;
+  padding: 2rem;
+  overflow-x: hidden; /* Prevenir scroll horizontal */
+}
+/* Sidebar Navigation */
+.sidebar {
+  width: 170px;
+  background-color: var(--secondary-color);
+  color: white;
+  padding: 2rem 1rem;
+  flex-shrink: 0; /* Añadido para prevenir que el sidebar se encoja */
 }
 
-h1,
-h2 {
-    color: var(--secondary-color);
-    margin-bottom: 1rem;
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0; /* Añadido para eliminar márgenes predeterminados */
 }
 
+.sidebar li {
+  margin-bottom: 1rem;
+}
+
+.sidebar a {
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  transition: background-color 0.3s ease;
+}
+
+.sidebar a:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+/* Cards */
 .card {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-}
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  }
 
-/* Estilos de las tablas */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-}
-
-th,
-td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-th {
-    background-color: var(--secondary-color);
-    color: white;
-}
-
-tr:hover {
-    background-color: #f5f5f5;
-}
-
-/* Estilos de formularios */
+/* Common form styles */
 form {
-    display: grid;
-    gap: 1rem;
+  display: grid;
+  gap: 0.5rem;
 }
 
-input[type="text"],
-input[type="date"],
-input[type="month"],
-select,
-textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
+.form-group {
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: bold;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+}
+
+input[readonly],
+span.formatted-value {
+  background-color: #f0f0f0;
+  color: #666;
 }
 
 button {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color var(--transition-speed) ease;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #2980b9;
+  background-color: #2980b9;
 }
 
-/* Estilos específicos */
+/* Common table styles */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+
+th, td {
+  padding: 0.75rem;
+  text-align: left;
+}
+
+th {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+tr {
+  background-color: white;
+  box-shadow: var(--box-shadow);
+}
+
+/* Specific styles for Agregar Trabajos page */
+#formularioTrabajo .form-group {
+  margin-bottom: 1rem;
+}
+
+#multiplicadorGroup {
+  transition: all 0.3s ease;
+}
+
+#cuerpoTablaTrabajos tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+#cuerpoTablaTrabajos tr:hover {
+  background-color: #e9ecef;
+}
+
+#cuerpoTablaTrabajos button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+#formularioFiltro {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+#formularioFiltro .form-group {
+  flex-grow: 1;
+}
+
+#descargarExcel {
+  margin-top: 1rem;
+}
+
+/* Styles for Dashboard (index) page */
 #graficoGanancias {
-    width: 100%;
-    height: 400px;
-    margin-top: 1rem;
+  width: 100%;
+  height: 400px;
+  margin-top: 1rem;
 }
 
-/* Media queries para diseño responsive */
-@media (max-width: 768px) {
-    nav ul {
-        flex-direction: column;
-    }
-
-    nav ul li {
-        margin-bottom: 10px;
-    }
-
-    .card {
-        padding: 1rem;
-    }
-
-    /* Convertir tabla a formato lista para móviles */
-    table,
-    thead,
-    tbody,
-    th,
-    td,
-    tr {
-        display: block;
-    }
-
-    thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-    }
-
-    tr {
-        margin-bottom: 1rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-
-    td {
-        border: none;
-        position: relative;
-        padding-left: 50%;
-    }
-
-    td:before {
-        content: attr(data-label);
-        position: absolute;
-        left: 6px;
-        width: 45%;
-        padding-right: 10px;
-        white-space: nowrap;
-        font-weight: bold;
-    }
+/* Modal styles */
+dialog {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 2rem;
 }
 
-/* Mejoras de accesibilidad */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        transition: none !important;
-    }
-}
-
-/* Estilos de foco para mejorar la accesibilidad por teclado */
-a:focus,
-button:focus,
-input:focus,
-select:focus,
-textarea:focus {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
 }

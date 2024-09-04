@@ -2,13 +2,15 @@
 let clientesData = [];
 let ciudadesData = [];
 
+
+
 /**
  * Inicializa la página cargando datos y configurando event listeners
  */
 function initializePage() {
     cargarTrabajos();
     cargarCiudades();
-
+   
     // Configurar event listeners para elementos del DOM
     const elementos = {
         'formularioTrabajo': ['submit', agregarTrabajo],

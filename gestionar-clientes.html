@@ -1,178 +1,137 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestionar Clientes</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/styles.css">
 </head>
-
 <body>
-    <header>
-        <nav>
+    <div class="container">
+        <nav class="sidebar">
             <ul>
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="agregar-trabajos.html">Agregar Trabajos</a></li>
                 <li><a href="gestionar-clientes.html">Gestionar Clientes</a></li>
             </ul>
         </nav>
-    </header>
+        <main>
+            <h1>Gestionar Clientes</h1>
 
-    <main>
-        <h1>Gestionar Clientes</h1>
-
-        <!-- Sección para agregar un nuevo cliente -->
-        <section class="card">
-            <h2>Agregar Nuevo Cliente</h2>
-            <form id="formularioCliente">
-                <div class="form-group">
-                    <label for="codigo">Código:</label>
-                    <input type="text" id="codigo" name="codigo" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="cliente">Cliente:</label>
-                    <input type="text" id="cliente" name="cliente" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="direccion">Dirección:</label>
-                    <input type="text" id="direccion" name="direccion" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="ciudad">Ciudad:</label>
-                    <input type="text" id="ciudad" name="ciudad" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="valorMantenimiento">Valor Mantenimiento:</label>
-                    <div class="input-group">
+            <section class="card">
+                <h2>Nuevo Cliente</h2>
+                <form id="formularioCliente">
+                    <div class="form-group">
+                        <label for="codigo">Código Cliente:</label>
+                        <input type="text" id="codigo" name="codigo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente">Nombre Cliente:</label>
+                        <input type="text" id="cliente" name="cliente" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="direccion">Dirección:</label>
+                        <input type="text" id="direccion" name="direccion" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ciudad">Ciudad:</label>
+                        <input type="text" id="ciudad" name="ciudad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="valorMantenimiento">Valor Mantenimiento:</label>
                         <input type="number" id="valorMantenimiento" name="valorMantenimiento" required>
-                        <span id="valorMantenimientoFormatted" class="valor-formateado" aria-live="polite"></span>
+                        <span id="valorMantenimientoFormatted" class="formatted-value"></span>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="valorIncidente">Valor Incidente:</label>
-                    <div class="input-group">
+                    <div class="form-group">
+                        <label for="valorIncidente">Valor Incidente:</label>
                         <input type="number" id="valorIncidente" name="valorIncidente" required>
-                        <span id="valorIncidenteFormatted" class="valor-formateado" aria-live="polite"></span>
+                        <span id="valorIncidenteFormatted" class="formatted-value"></span>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="viatico">Viático:</label>
-                    <div class="input-group">
+                    <div class="form-group">
+                        <label for="viatico">Viático:</label>
                         <input type="number" id="viatico" name="viatico" required>
-                        <span id="viaticoFormatted" class="valor-formateado" aria-live="polite"></span>
+                        <span id="viaticoFormatted" class="formatted-value"></span>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="estacionamiento">Estacionamiento:</label>
-                    <div class="input-group">
+                    <div class="form-group">
+                        <label for="estacionamiento">Estacionamiento:</label>
                         <input type="number" id="estacionamiento" name="estacionamiento" required>
-                        <span id="estacionamientoFormatted" class="valor-formateado" aria-live="polite"></span>
+                        <span id="estacionamientoFormatted" class="formatted-value"></span>
                     </div>
+                    <button type="submit">Agregar Cliente</button>
+                </form>
+            </section>
+
+            <section class="card">
+                <h2>Lista de Clientes</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Dirección</th>
+                                <th>Ciudad</th>
+                                <th>Valor Mantenimiento</th>
+                                <th>Valor Incidente</th>
+                                <th>Viático</th>
+                                <th>Estacionamiento</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoTablaClientes">
+                        </tbody>
+                    </table>
                 </div>
+            </section>
+        </main>
+    </div>
 
-                <button type="submit">Agregar Cliente</button>
-            </form>
-        </section>
-
-        <!-- Sección para mostrar la lista de clientes -->
-        <section class="card">
-            <h2>Lista de Clientes</h2>
-            <table>
-                <caption>Clientes registrados</caption>
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Cliente</th>
-                        <th>Dirección</th>
-                        <th>Ciudad</th>
-                        <th>Valor Mantenimiento</th>
-                        <th>Valor Incidente</th>
-                        <th>Viático</th>
-                        <th>Estacionamiento</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpoTablaClientes">
-                    <!-- Los clientes se cargarán dinámicamente aquí -->
-                </tbody>
-            </table>
-        </section>
-    </main>
-
-    <!-- Modal para editar cliente -->
     <dialog id="modalEditarCliente">
         <h2>Editar Cliente</h2>
         <form id="formularioEditarCliente">
             <input type="hidden" id="editId" name="id">
-
             <div class="form-group">
-                <label for="editCodigo">Código:</label>
+                <label for="editCodigo">Código Cliente:</label>
                 <input type="text" id="editCodigo" name="codigo" required>
             </div>
-
             <div class="form-group">
-                <label for="editCliente">Cliente:</label>
+                <label for="editCliente">Nombre Cliente:</label>
                 <input type="text" id="editCliente" name="cliente" required>
             </div>
-
             <div class="form-group">
                 <label for="editDireccion">Dirección:</label>
                 <input type="text" id="editDireccion" name="direccion" required>
             </div>
-
             <div class="form-group">
                 <label for="editCiudad">Ciudad:</label>
                 <input type="text" id="editCiudad" name="ciudad" required>
             </div>
-
             <div class="form-group">
                 <label for="editValorMantenimiento">Valor Mantenimiento:</label>
-                <div class="input-group">
-                    <input type="number" id="editValorMantenimiento" name="valorMantenimiento" required>
-                    <span id="editValorMantenimientoFormatted" class="valor-formateado" aria-live="polite"></span>
-                </div>
+                <input type="number" id="editValorMantenimiento" name="valorMantenimiento" required>
+                <span id="editValorMantenimientoFormatted" class="formatted-value"></span>
             </div>
-
             <div class="form-group">
                 <label for="editValorIncidente">Valor Incidente:</label>
-                <div class="input-group">
-                    <input type="number" id="editValorIncidente" name="valorIncidente" required>
-                    <span id="editValorIncidenteFormatted" class="valor-formateado" aria-live="polite"></span>
-                </div>
+                <input type="number" id="editValorIncidente" name="valorIncidente" required>
+                <span id="editValorIncidenteFormatted" class="formatted-value"></span>
             </div>
-
             <div class="form-group">
                 <label for="editViatico">Viático:</label>
-                <div class="input-group">
-                    <input type="number" id="editViatico" name="viatico" required>
-                    <span id="editViaticoFormatted" class="valor-formateado" aria-live="polite"></span>
-                </div>
+                <input type="number" id="editViatico" name="viatico" required>
+                <span id="editViaticoFormatted" class="formatted-value"></span>
             </div>
-
             <div class="form-group">
                 <label for="editEstacionamiento">Estacionamiento:</label>
-                <div class="input-group">
-                    <input type="number" id="editEstacionamiento" name="estacionamiento" required>
-                    <span id="editEstacionamientoFormatted" class="valor-formateado" aria-live="polite"></span>
-                </div>
+                <input type="number" id="editEstacionamiento" name="estacionamiento" required>
+                <span id="editEstacionamientoFormatted" class="formatted-value"></span>
             </div>
-
-            <div class="form-actions">
-                <button type="submit">Actualizar Cliente</button>
-                <button type="button" id="cerrarModal">Cancelar</button>
-            </div>
+            <button type="submit">Actualizar Cliente</button>
+            <button type="button" id="cerrarModal">Cancelar</button>
         </form>
     </dialog>
 
-    <script src="js/gestionar-clientes.js"></script>
+    <script src="./js/gestionar-clientes.js"></script>
 </body>
-
 </html>
