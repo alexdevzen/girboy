@@ -441,5 +441,53 @@ function descargarExcel() {
         });
 }
 
+
+// Agregar el nuevo botón al HTML
+document.addEventListener('DOMContentLoaded', function() {
+    const excelButton = document.getElementById('descargarExcel');
+    const newButton = document.createElement('button');
+    newButton.id = 'descargarExcelBoleta';
+    newButton.textContent = 'Excel formato boleta';
+    newButton.style.marginLeft = '10px';
+    excelButton.parentNode.insertBefore(newButton, excelButton.nextSibling);
+    newButton.addEventListener('click', descargarExcelBoleta);
+});
+
+// Función para descargar Excel en formato boleta
+function descargarExcelBoleta() {
+    const mesSeleccionado = document.getElementById('mes').value;
+
+    if (!mesSeleccionado) {
+        alert('Por favor, seleccione un mes para descargar.');
+        return;
+    }
+
+    const [anio, mes] = mesSeleccionado.split('-');
+    const url = `/api/trabajos/excel-boleta?anio=${anio}&mes=${mes}`;
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al descargar el archivo Excel');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `boletas-${anio}-${mes}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocurrió un error al descargar el archivo Excel. Por favor, intente de nuevo.');
+        });
+}
+
+
 // Inicializar la página cuando el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', initializePage);
