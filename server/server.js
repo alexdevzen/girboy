@@ -277,6 +277,88 @@ app.get('/api/trabajos/excel', async (req, res) => {
     }
 });
 
+
+app.get('/api/trabajos/excel-boleta', async (req, res) => {
+    try {
+        const { anio, mes } = req.query;
+        const db = await conectarDB();
+        const trabajos = db.collection('trabajos');
+        const clientes = db.collection('clientes');
+
+        const primerDiaMes = new Date(anio, mes - 1, 1);
+        const ultimoDiaMes = new Date(anio, mes, 0);
+
+        const query = {
+            fecha: {
+                $gte: primerDiaMes.toISOString().split('T')[0],
+                $lte: ultimoDiaMes.toISOString().split('T')[0]
+            }
+        };
+
+        const resultado = await trabajos.find(query).toArray();
+
+        const workbook = new Excel.Workbook();
+        const worksheet = workbook.addWorksheet('Boletas');
+
+        worksheet.columns = [
+            { header: 'Fecha', key: 'fecha', width: 15 },
+            { header: 'Código', key: 'codigo', width: 15 },
+            { header: 'Ciudad', key: 'ciudad', width: 20 },
+            { header: 'Tipo', key: 'tipo', width: 15 },
+            { header: 'Valor', key: 'valor', width: 15 },
+            { header: 'Viáticos y Estacionamiento', key: 'viaticosYEstacionamiento', width: 25 }
+        ];
+
+        let totalViaticosYEstacionamiento = 0;
+
+        for (const trabajo of resultado) {
+            const cliente = await clientes.findOne({ codigo: trabajo.codigoCliente });
+            const [anio, mes, dia] = trabajo.fecha.split('-');
+            const fechaFormateada = `${dia}/${mes}`; // Formato corregido: día/mes
+            const esMantenimieto = trabajo.tipo.toUpperCase() === 'MANTENIMIENTO';
+            
+            const valorBruto = trabajo.valor;
+            const valorConImpuesto = valorBruto / 0.8625; // Aplicar la retención del 13.75%
+
+            worksheet.addRow({
+                fecha: fechaFormateada,
+                codigo: trabajo.codigoCliente.toUpperCase(),
+                ciudad: cliente.ciudad.toUpperCase(),
+                tipo: esMantenimieto ? 'M' : '',
+                valor: valorConImpuesto,
+                viaticosYEstacionamiento: ''
+            });
+
+            totalViaticosYEstacionamiento += trabajo.viatico + trabajo.estacionamiento;
+        }
+
+        // Agregar fila para viáticos y estacionamiento
+        const totalViaticosYEstacionamientoConImpuesto = totalViaticosYEstacionamiento / 0.8625;
+        worksheet.addRow({
+            fecha: '',
+            codigo: 'VIATICOS Y ESTACIONAMIENTO',
+            ciudad: '',
+            tipo: '',
+            valor: '',
+            viaticosYEstacionamiento: totalViaticosYEstacionamientoConImpuesto
+        });
+
+        // Formatear celdas
+        worksheet.getColumn('valor').numFmt = '#,##0';
+        worksheet.getColumn('viaticosYEstacionamiento').numFmt = '#,##0';
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=boletas-${anio}-${mes}.xlsx`);
+
+        await workbook.xlsx.write(res);
+        res.end();
+
+    } catch (error) {
+        console.error('Error al generar Excel de boletas:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Middleware de manejo de errores
 app.use((err, req, res, next) => {
     console.error(err.stack);
