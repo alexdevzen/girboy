@@ -2,8 +2,6 @@
 let clientesData = [];
 let ciudadesData = [];
 
-
-
 /**
  * Inicializa la página cargando datos y configurando event listeners
  */
@@ -207,7 +205,7 @@ function actualizarValorCalculado() {
 }
 
 /**
- * Agrega un nuevo trabajo
+ * Agrega un nuevo trabajo y actualiza los valores del cliente
  * @param {Event} event - Evento del formulario
  */
 function agregarTrabajo(event) {
@@ -231,16 +229,18 @@ function agregarTrabajo(event) {
         trabajoData.valor = trabajoData.tipoValor === 'mantenimiento'
             ? cliente.valorMantenimiento
             : cliente.valorIncidente * parseInt(trabajoData.multiplicador || 1);
-        // Usar los valores ingresados por el usuario para viático y estacionamiento
         trabajoData.viatico = parseFloat(trabajoData.viatico) || 0;
         trabajoData.estacionamiento = parseFloat(trabajoData.estacionamiento) || 0;
+
+        // Actualizar los valores del cliente
+        cliente.viatico = trabajoData.viatico;
+        cliente.estacionamiento = trabajoData.estacionamiento;
     } else {
         alert('Cliente no encontrado. Por favor, seleccione un cliente válido.');
         return;
     }
 
     trabajoData.valor = Number(trabajoData.valor) || 0;
-
     trabajoData.tipo = trabajoData.tipoValor === 'mantenimiento' ? 'Mantenimiento' : 'Incidente';
 
     delete trabajoData.tipoValor;
@@ -249,11 +249,16 @@ function agregarTrabajo(event) {
 
     console.log('Datos finales a enviar:', JSON.stringify(trabajoData));
 
-    fetch('/api/trabajos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(trabajoData),
-    })
+    // Primero, actualizar el cliente
+    actualizarCliente(cliente)
+        .then(() => {
+            // Luego, agregar el trabajo
+            return fetch('/api/trabajos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(trabajoData),
+            });
+        })
         .then(response => {
             if (!response.ok) {
                 return response.text().then(text => {
@@ -270,8 +275,30 @@ function agregarTrabajo(event) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Ocurrió un error al agregar el trabajo. Por favor, intente de nuevo.');
+            alert('Ocurrió un error al agregar el trabajo o actualizar el cliente. Por favor, intente de nuevo.');
         });
+}
+
+/**
+ * Actualiza los datos del cliente en el servidor
+ * @param {Object} cliente - Datos del cliente a actualizar
+ * @return {Promise} Promesa que resuelve cuando se completa la actualización
+ */
+function actualizarCliente(cliente) {
+    return fetch(`/api/clientes/${cliente._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            viatico: cliente.viatico,
+            estacionamiento: cliente.estacionamiento
+        }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al actualizar el cliente');
+        }
+        return response.json();
+    });
 }
 
 /**

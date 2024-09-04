@@ -57,9 +57,15 @@ app.put('/api/clientes/:id', async (req, res) => {
         const db = await conectarDB();
         const clientes = db.collection('clientes');
         const id = req.params.id;
+        
+        // Solo actualizamos los campos proporcionados
+        const updateData = {};
+        if (req.body.viatico !== undefined) updateData.viatico = req.body.viatico;
+        if (req.body.estacionamiento !== undefined) updateData.estacionamiento = req.body.estacionamiento;
+
         const resultado = await clientes.updateOne(
             { _id: new ObjectId(id) },
-            { $set: req.body }
+            { $set: updateData }
         );
         res.json(resultado);
     } catch (error) {
