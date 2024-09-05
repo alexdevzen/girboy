@@ -205,6 +205,7 @@ h1 {
   gap: 1rem;
   max-width: 50%;
   margin: 0 auto;
+  
 }
 
 #formularioFiltro .form-group {
@@ -217,6 +218,76 @@ h1 {
   font-weight: bold;
   color: var(--primary-color);
 }
+
+
+
+
+/* Estilos generales para la sección de filtrado */
+.section.card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.section.card h2 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+/* Estilos para el formulario de filtrado */
+#formularioFiltro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+#formularioFiltro .form-group {
+  flex: 1;
+  max-width: calc(100% - 110px); /* Ajusta este valor según el ancho del botón filtrar */
+}
+
+#formularioFiltro label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+#formularioFiltro input[type="month"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Estilos para los botones */
+#formularioFiltro button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+/* Mantén los colores originales de los botones aquí */
+
+#formularioFiltro button[type="submit"] {
+  margin-left: auto; /* Alinea el botón filtrar a la derecha */
+}
+
+.excel-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

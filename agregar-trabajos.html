@@ -74,17 +74,24 @@
                     <button type="submit">Agregar Trabajo</button>
                 </form>
             </section>
-            <section class="card">
+
+            
+            <div class="section card">
                 <h2>Filtrar Trabajos</h2>
                 <form id="formularioFiltro">
-                    <div class="form-group">
-                        <label for="mes">Mes:</label>
-                        <input type="month" id="mes" name="mes" required>
-                    </div>
-                    <button type="submit">Filtrar</button>
+                  <div class="form-group">
+                    <label for="mes">Mes:</label>
+                    <input type="month" id="mes" name="mes" required>
+                  </div>
+                  <button type="submit">Filtrar</button>
+                  <div class="excel-buttons">
+                    <button type="button" id="descargarExcel">Descargar Excel</button>
+                    <button type="button" id="descargarExcelBoleta">Excel formato boleta</button>
+                  </div>
                 </form>
-                <button id="descargarExcel">Descargar Excel</button>
-            </section>
+              </div>
+
+
             <section class="card">
                 <h2>Lista de Trabajos</h2>
                 <div class="table-responsive">
