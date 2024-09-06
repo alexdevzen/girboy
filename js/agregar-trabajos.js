@@ -25,13 +25,19 @@ let ciudadesData = [];
  */
 const TrabajoManager = {
     /**
-     * Carga y muestra la lista de trabajos
+     * Carga y muestra la lista de trabajos del mes actual o del mes especificado
+     * @param {number} [anio] - Año para filtrar los trabajos
+     * @param {number} [mes] - Mes para filtrar los trabajos
      */
-    async cargarTrabajos() {
+    async cargarTrabajos(anio, mes) {
+        const fechaActual = new Date();
+        anio = anio || fechaActual.getFullYear();
+        mes = mes || fechaActual.getMonth() + 1; // getMonth() devuelve 0-11, necesitamos 1-12
+
         try {
             const [clientesResponse, trabajosResponse] = await Promise.all([
                 fetch('/api/clientes'),
-                fetch('/api/trabajos')
+                fetch(`/api/trabajos?anio=${anio}&mes=${mes}`)
             ]);
             clientesData = await clientesResponse.json();
             const trabajos = await trabajosResponse.json();
@@ -285,58 +291,47 @@ const FiltroManager = {
         }
 
         const [anio, mes] = mesSeleccionado.split('-');
-
-        try {
-            const response = await fetch(`/api/trabajos?anio=${anio}&mes=${mes}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const trabajos = await response.json();
-            TrabajoManager.renderizarTablaTrabajos(trabajos);
-        } catch (error) {
-            console.error('Error al filtrar trabajos:', error);
-            alert('Hubo un error al filtrar los trabajos. Por favor, intente de nuevo.');
-        }
+        await TrabajoManager.cargarTrabajos(anio, mes);
     },
 
-    /**
+   /**
      * Descarga un archivo Excel con los trabajos del mes seleccionado
      * @param {string} tipo - Tipo de Excel a descargar ('normal' o 'boleta')
      */
-    async descargarExcel(tipo = 'normal') {
-        const mesSeleccionado = document.getElementById('mes').value;
+   async descargarExcel(tipo = 'normal') {
+    const mesSeleccionado = document.getElementById('mes').value;
 
-        if (!mesSeleccionado) {
-            alert('Por favor, seleccione un mes para descargar.');
-            return;
-        }
-
-        const [anio, mes] = mesSeleccionado.split('-');
-        const url = tipo === 'boleta' 
-            ? `/api/trabajos/excel-boleta?anio=${anio}&mes=${mes}`
-            : `/api/trabajos/excel?anio=${anio}&mes=${mes}`;
-
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error('Error al descargar el archivo Excel');
-            }
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = tipo === 'boleta' 
-                ? `boletas-${anio}-${mes}.xlsx`
-                : `trabajos-${anio}-${mes}.xlsx`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Ocurrió un error al descargar el archivo Excel. Por favor, intente de nuevo.');
-        }
+    if (!mesSeleccionado) {
+        alert('Por favor, seleccione un mes para descargar.');
+        return;
     }
+
+    const [anio, mes] = mesSeleccionado.split('-');
+    const apiUrl = tipo === 'boleta' 
+        ? `/api/trabajos/excel-boleta?anio=${anio}&mes=${mes}`
+        : `/api/trabajos/excel?anio=${anio}&mes=${mes}`;
+
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error('Error al descargar el archivo Excel');
+        }
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = downloadUrl;
+        a.download = tipo === 'boleta' 
+            ? `boletas-${anio}-${mes}.xlsx`
+            : `trabajos-${anio}-${mes}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Ocurrió un error al descargar el archivo Excel. Por favor, intente de nuevo.');
+    }
+}
 };
 
 /**
@@ -400,7 +395,11 @@ function formatearValorMoneda(valor) {
  * Inicializa la página cuando el DOM está completamente cargado
  */
 function initializePage() {
-    TrabajoManager.cargarTrabajos();
+    const fechaActual = new Date();
+    const mesActual = fechaActual.toISOString().slice(0, 7); // Formato YYYY-MM
+    document.getElementById('mes').value = mesActual;
+
+    TrabajoManager.cargarTrabajos(); // Cargará los trabajos del mes actual por defecto
     ClienteManager.cargarCiudades();
    
     // Configurar event listeners para elementos del DOM

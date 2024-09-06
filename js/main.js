@@ -122,16 +122,19 @@ function actualizarDetalleIngresos(ganancias, labels) {
     `;
 }
 
+
+
 /**
- * Carga la lista de trabajos, opcionalmente filtrada por año y mes
+ * Carga la lista de trabajos, por defecto del mes actual o filtrada por año y mes
  * @param {number} [anio] - Año para filtrar los trabajos
  * @param {number} [mes] - Mes para filtrar los trabajos
  */
 function cargarListaTrabajos(anio, mes) {
-    let url = '/api/trabajos';
-    if (anio && mes) {
-        url += `?anio=${anio}&mes=${mes}`;
-    }
+    const fechaActual = new Date();
+    anio = anio || fechaActual.getFullYear();
+    mes = mes || fechaActual.getMonth() + 1; // getMonth() devuelve 0-11, necesitamos 1-12
+
+    const url = `/api/trabajos?anio=${anio}&mes=${mes}`;
 
     fetch(url)
         .then(response => response.json())
@@ -163,7 +166,6 @@ function cargarListaTrabajos(anio, mes) {
         .catch(error => console.error('Error al cargar los trabajos:', error));
 }
 
-
 /**
  * Filtra los trabajos por el mes seleccionado
  * @param {Event} event - Evento del formulario
@@ -180,6 +182,25 @@ function filtrarTrabajos(event) {
     const [anio, mes] = mesSeleccionado.split('-');
     cargarListaTrabajos(anio, mes);
 }
+
+/**
+ * Inicializa la página cuando el DOM está completamente cargado
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    llenarSelectorAño();
+    cargarGraficoIngresos();
+    
+    // Establecer el mes actual en el selector de mes
+    const fechaActual = new Date();
+    const mesActual = fechaActual.toISOString().slice(0, 7); // Formato YYYY-MM
+    document.getElementById('mes').value = mesActual;
+    
+    cargarListaTrabajos(); // Cargará los trabajos del mes actual por defecto
+    document.getElementById('formularioFiltro').addEventListener('submit', filtrarTrabajos);
+    document.getElementById('añoGanancias').addEventListener('change', cargarGraficoIngresos);
+});
+
+
 
 /**
  * Formatea un valor numérico a formato de moneda chilena
