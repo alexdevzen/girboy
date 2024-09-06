@@ -11,7 +11,7 @@
     <div class="container">
         <nav class="sidebar">
             <ul>
-                <li><a href="index.html">Inicio</a></li>
+                <li><a href="index.html" aria-current="page">Inicio</a></li>
                 <li><a href="agregar-trabajos.html">Agregar Trabajos</a></li>
                 <li><a href="gestionar-clientes.html">Gestionar Clientes</a></li>
             </ul>
@@ -20,14 +20,16 @@
             <h1>Dashboard</h1>
             <section class="card ingresos-mensuales">
                 <h2>Ingresos Mensuales</h2>
-                <div class="form-group">
-                    <label for="añoGanancias">Seleccionar año:</label>
-                    <select id="añoGanancias"></select>
-                </div>
+                <form>
+                    <div class="form-group">
+                        <label for="añoGanancias">Seleccionar año:</label>
+                        <select id="añoGanancias" name="añoGanancias"></select>
+                    </div>
+                </form>
                 <div class="ingresos-chart-container">
-                    <canvas id="graficoIngresos"></canvas>
+                    <canvas id="graficoIngresos" aria-label="Gráfico de ingresos mensuales" role="img"></canvas>
                 </div>
-                <div id="ingresosResumen"></div>
+                <div id="ingresosResumen" aria-live="polite"></div>
             </section>
             <section class="card filtrar-trabajos">
                 <h2>Filtrar Trabajos</h2>
@@ -43,17 +45,18 @@
                 <h2>Lista de Trabajos</h2>
                 <div class="table-responsive">
                     <table>
+                        <caption>Listado de trabajos realizados</caption>
                         <thead>
                             <tr>
-                                <th>Fecha</th>
-                                <th>Código</th>
-                                <th>Tipo</th>
-                                <th>Cliente</th>
-                                <th>Ciudad</th>
-                                <th>Valor</th>
-                                <th>Viático</th>
-                                <th>Estacionamiento</th>
-                                <th>Descripción</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Código</th>
+                                <th scope="col">Tipo</th>
+                                <th scope="col">Cliente</th>
+                                <th scope="col">Ciudad</th>
+                                <th scope="col">Valor</th>
+                                <th scope="col">Viático</th>
+                                <th scope="col">Estacionamiento</th>
+                                <th scope="col">Descripción</th>
                             </tr>
                         </thead>
                         <tbody id="cuerpoTablaTrabajosListado"></tbody>

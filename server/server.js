@@ -12,6 +12,12 @@ const port = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname, '..')));
 app.use(express.json());
 
+// Función de utilidad para manejar errores
+const handleError = (res, error) => {
+    console.error('Error:', error);
+    res.status(500).json({ error: error.message || 'Error interno del servidor' });
+};
+
 /**
  * Obtiene todas las ciudades únicas
  */
@@ -22,7 +28,7 @@ app.get('/api/ciudades', async (req, res) => {
         const ciudades = await clientes.distinct('ciudad');
         res.json(ciudades);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleError(res, error);
     }
 });
 
@@ -33,11 +39,11 @@ app.get('/api/clientes', async (req, res) => {
     try {
         const db = await conectarDB();
         const clientes = db.collection('clientes');
-        let query = req.query.ciudad ? { ciudad: req.query.ciudad } : {};
+        const query = req.query.ciudad ? { ciudad: req.query.ciudad } : {};
         const resultado = await clientes.find(query).toArray();
         res.json(resultado);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleError(res, error);
     }
 });
 
@@ -46,9 +52,9 @@ app.post('/api/clientes', async (req, res) => {
         const db = await conectarDB();
         const clientes = db.collection('clientes');
         const resultado = await clientes.insertOne(req.body);
-        res.json(resultado);
+        res.status(201).json(resultado);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleError(res, error);
     }
 });
 
@@ -58,7 +64,6 @@ app.put('/api/clientes/:id', async (req, res) => {
         const clientes = db.collection('clientes');
         const id = req.params.id;
         
-        // Solo actualizamos los campos proporcionados
         const updateData = {};
         if (req.body.viatico !== undefined) updateData.viatico = req.body.viatico;
         if (req.body.estacionamiento !== undefined) updateData.estacionamiento = req.body.estacionamiento;
@@ -67,9 +72,13 @@ app.put('/api/clientes/:id', async (req, res) => {
             { _id: new ObjectId(id) },
             { $set: updateData }
         );
+        
+        if (resultado.matchedCount === 0) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
         res.json(resultado);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleError(res, error);
     }
 });
 
@@ -79,9 +88,13 @@ app.delete('/api/clientes/:id', async (req, res) => {
         const clientes = db.collection('clientes');
         const id = req.params.id;
         const resultado = await clientes.deleteOne({ _id: new ObjectId(id) });
+        
+        if (resultado.deletedCount === 0) {
+            return res.status(404).json({ error: 'Cliente no encontrado' });
+        }
         res.json(resultado);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleError(res, error);
     }
 });
 
@@ -96,7 +109,7 @@ app.get('/api/clientes/:id', async (req, res) => {
         }
         res.json(resultado);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleError(res, error);
     }
 });
 
@@ -134,7 +147,7 @@ app.get('/api/trabajos', async (req, res) => {
 
         res.json(trabajosConCliente);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleError(res, error);
     }
 });
 
@@ -161,9 +174,9 @@ app.post('/api/trabajos', async (req, res) => {
         };
 
         const resultado = await trabajos.insertOne(nuevoTrabajo);
-        res.json(resultado);
+        res.status(201).json(resultado);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleError(res, error);
     }
 });
 
@@ -173,9 +186,13 @@ app.delete('/api/trabajos/:id', async (req, res) => {
         const trabajos = db.collection('trabajos');
         const id = req.params.id;
         const resultado = await trabajos.deleteOne({ _id: new ObjectId(id) });
+        
+        if (resultado.deletedCount === 0) {
+            return res.status(404).json({ error: 'Trabajo no encontrado' });
+        }
         res.json(resultado);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleError(res, error);
     }
 });
 
@@ -216,7 +233,7 @@ app.get('/api/ganancias', async (req, res) => {
 
         res.json(gananciasmensuales);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        handleError(res, error);
     }
 });
 
@@ -276,7 +293,6 @@ app.get('/api/trabajos/excel', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
 
 app.get('/api/trabajos/excel-boleta', async (req, res) => {
     try {

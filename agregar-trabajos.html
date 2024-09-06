@@ -11,7 +11,7 @@
         <nav class="sidebar">
             <ul>
                 <li><a href="index.html">Inicio</a></li>
-                <li><a href="agregar-trabajos.html">Agregar Trabajos</a></li>
+                <li><a href="agregar-trabajos.html" aria-current="page">Agregar Trabajos</a></li>
                 <li><a href="gestionar-clientes.html">Gestionar Clientes</a></li>
             </ul>
         </nav>
@@ -75,39 +75,38 @@
                 </form>
             </section>
 
-            
-            <div class="section card">
+            <section class="card">
                 <h2>Filtrar Trabajos</h2>
                 <form id="formularioFiltro">
-                  <div class="form-group">
-                    <label for="mes">Mes:</label>
-                    <input type="month" id="mes" name="mes" required>
-                  </div>
-                  <button type="submit">Filtrar</button>
-                  <div class="excel-buttons">
-                    <button type="button" id="descargarExcel">Descargar Excel</button>
-                    <button type="button" id="descargarExcelBoleta">Excel formato boleta</button>
-                  </div>
+                    <div class="form-group">
+                        <label for="mes">Mes:</label>
+                        <input type="month" id="mes" name="mes" required>
+                    </div>
+                    <button type="submit">Filtrar</button>
+                    <div class="excel-buttons">
+                        <button type="button" id="descargarExcel">Descargar Excel</button>
+                        <button type="button" id="descargarExcelBoleta">Excel formato boleta</button>
+                    </div>
                 </form>
-              </div>
-
+            </section>
 
             <section class="card">
                 <h2>Lista de Trabajos</h2>
                 <div class="table-responsive">
                     <table>
+                        <caption>Listado de trabajos registrados</caption>
                         <thead>
                             <tr>
-                                <th>Fecha</th>
-                                <th>Código</th>
-                                <th>Tipo</th>
-                                <th>Cliente</th>
-                                <th>Ciudad</th>
-                                <th>Valor</th>
-                                <th>Viático</th>
-                                <th>Estacionamiento</th>
-                                <th>Descripción</th>
-                                <th>Acciones</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Código</th>
+                                <th scope="col">Tipo</th>
+                                <th scope="col">Cliente</th>
+                                <th scope="col">Ciudad</th>
+                                <th scope="col">Valor</th>
+                                <th scope="col">Viático</th>
+                                <th scope="col">Estacionamiento</th>
+                                <th scope="col">Descripción</th>
+                                <th scope="col">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="cuerpoTablaTrabajos"></tbody>

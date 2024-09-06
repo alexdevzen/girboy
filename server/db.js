@@ -5,7 +5,11 @@ require('dotenv').config();
 const uri = process.env.MONGODB_URI;
 
 // Opciones de conexión para el cliente de MongoDB
-const options = { useNewUrlParser: true, useUnifiedTopology: true };
+const options = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    // Añadir más opciones según sea necesario
+};
 
 // Instancia del cliente MongoDB
 const client = new MongoClient(uri, options);
@@ -18,20 +22,16 @@ let database;
  * @returns {Promise<Db>} Instancia de la base de datos conectada
  */
 async function conectarDB() {
-    // Si ya existe una conexión, la retornamos
     if (database) return database;
 
     try {
-        // Intentamos establecer la conexión
         await client.connect();
         console.log('Conectado a MongoDB');
 
-        // Obtenemos la instancia de la base de datos
-        database = client.db('tu_base_de_datos');
+        database = client.db(process.env.DB_NAME || 'tu_base_de_datos');
         return database;
     } catch (error) {
         console.error('Error conectando a MongoDB:', error);
-        // En caso de error, terminamos el proceso
         process.exit(1);
     }
 }

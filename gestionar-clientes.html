@@ -12,7 +12,7 @@
             <ul>
                 <li><a href="index.html">Inicio</a></li>
                 <li><a href="agregar-trabajos.html">Agregar Trabajos</a></li>
-                <li><a href="gestionar-clientes.html">Gestionar Clientes</a></li>
+                <li><a href="gestionar-clientes.html" aria-current="page">Gestionar Clientes</a></li>
             </ul>
         </nav>
         <main>
@@ -63,17 +63,18 @@
                 <h2>Lista de Clientes</h2>
                 <div class="table-responsive">
                     <table>
+                        <caption>Listado de clientes registrados</caption>
                         <thead>
                             <tr>
-                                <th>Código</th>
-                                <th>Nombre</th>
-                                <th>Dirección</th>
-                                <th>Ciudad</th>
-                                <th>Valor Mantenimiento</th>
-                                <th>Valor Incidente</th>
-                                <th>Viático</th>
-                                <th>Estacionamiento</th>
-                                <th>Acciones</th>
+                                <th scope="col">Código</th>
+                                <th scope="col">Nombre</th>
+                                <th scope="col">Dirección</th>
+                                <th scope="col">Ciudad</th>
+                                <th scope="col">Valor Mantenimiento</th>
+                                <th scope="col">Valor Incidente</th>
+                                <th scope="col">Viático</th>
+                                <th scope="col">Estacionamiento</th>
+                                <th scope="col">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="cuerpoTablaClientes"></tbody>
@@ -122,12 +123,13 @@
                 <label for="editEstacionamiento">Estacionamiento:</label>
                 <input type="number" id="editEstacionamiento" name="estacionamiento" required>
                 <span id="editEstacionamientoFormatted" class="formatted-value"></span>
-            </div>
-            <button type="submit">Actualizar Cliente</button>
-            <button type="button" id="cerrarModal">Cancelar</button>
-        </form>
-    </dialog>
-
-    <script src="./js/gestionar-clientes.js"></script>
-</body>
-</html>
+                <div class="dialog-buttons">
+                    <button type="submit">Actualizar Cliente</button>
+                    <button type="button" id="cerrarModal">Cancelar</button>
+                </div>
+            </form>
+        </dialog>
+    
+        <script src="./js/gestionar-clientes.js"></script>
+    </body>
+    </html>
