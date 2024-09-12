@@ -29,16 +29,35 @@ const TrabajoManager = {
      * @param {number} [anio] - Año para filtrar los trabajos
      * @param {number} [mes] - Mes para filtrar los trabajos
      */
+    // Modifica la función cargarTrabajos
     async cargarTrabajos(anio, mes) {
         const fechaActual = new Date();
         anio = anio || fechaActual.getFullYear();
-        mes = mes || fechaActual.getMonth() + 1; // getMonth() devuelve 0-11, necesitamos 1-12
+        mes = mes || fechaActual.getMonth() + 1;
 
         try {
             const [clientesResponse, trabajosResponse] = await Promise.all([
-                fetch('/api/clientes'),
-                fetch(`/api/trabajos?anio=${anio}&mes=${mes}`)
+                fetch('/api/clientes', {
+                    headers: {
+                        'x-auth-token': getToken()
+                    }
+                }),
+                fetch(`/api/trabajos?anio=${anio}&mes=${mes}`, {
+                    headers: {
+                        'x-auth-token': getToken()
+                    }
+                })
             ]);
+
+            if (!clientesResponse.ok || !trabajosResponse.ok) {
+                if (clientesResponse.status === 401 || trabajosResponse.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                throw new Error('Error al cargar datos');
+            }
+
             clientesData = await clientesResponse.json();
             const trabajos = await trabajosResponse.json();
             this.renderizarTablaTrabajos(trabajos);
@@ -124,11 +143,19 @@ const TrabajoManager = {
         try {
             const response = await fetch('/api/trabajos', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': getToken()
+                },
                 body: JSON.stringify(trabajoData),
             });
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
                 throw new Error(`Error al agregar el trabajo: ${await response.text()}`);
             }
 
@@ -151,7 +178,10 @@ const TrabajoManager = {
         try {
             const response = await fetch(`/api/clientes/${cliente._id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': getToken()
+                },
                 body: JSON.stringify({
                     viatico: cliente.viatico,
                     estacionamiento: cliente.estacionamiento
@@ -159,6 +189,11 @@ const TrabajoManager = {
             });
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
                 throw new Error('Error al actualizar el cliente');
             }
 
@@ -176,8 +211,18 @@ const TrabajoManager = {
     async eliminarTrabajo(id) {
         if (confirm('¿Estás seguro de que quieres eliminar este trabajo?')) {
             try {
-                const response = await fetch(`/api/trabajos/${id}`, { method: 'DELETE' });
+                const response = await fetch(`/api/trabajos/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'x-auth-token': getToken()
+                    }
+                });
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                        window.location.href = 'login.html';
+                        return;
+                    }
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
@@ -212,7 +257,19 @@ const ClienteManager = {
      */
     async cargarCiudades() {
         try {
-            const response = await fetch('/api/ciudades');
+            const response = await fetch('/api/ciudades', {
+                headers: {
+                    'x-auth-token': getToken()
+                }
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                throw new Error('Error al cargar las ciudades');
+            }
             ciudadesData = await response.json();
             DOM.ciudad.innerHTML = '<option value="">Seleccione una ciudad</option>';
             ciudadesData.forEach(ciudad => {
@@ -236,8 +293,17 @@ const ClienteManager = {
         if (!ciudadSeleccionada) return;
 
         try {
-            const response = await fetch(`/api/clientes?ciudad=${encodeURIComponent(ciudadSeleccionada)}`);
+            const response = await fetch(`/api/clientes?ciudad=${encodeURIComponent(ciudadSeleccionada)}`, {
+                headers: {
+                    'x-auth-token': getToken()
+                }
+            });
             if (!response.ok) {
+                if (response.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
                 throw new Error('Error al cargar los clientes');
             }
             clientesData = await response.json();
@@ -294,45 +360,61 @@ const FiltroManager = {
         await TrabajoManager.cargarTrabajos(anio, mes);
     },
 
-   /**
-     * Descarga un archivo Excel con los trabajos del mes seleccionado
-     * @param {string} tipo - Tipo de Excel a descargar ('normal' o 'boleta')
-     */
-   async descargarExcel(tipo = 'normal') {
-    const mesSeleccionado = document.getElementById('mes').value;
+    /**
+      * Descarga un archivo Excel con los trabajos del mes seleccionado
+      * @param {string} tipo - Tipo de Excel a descargar ('normal' o 'boleta')
+      */
+    async descargarExcel(tipo = 'normal') {
+        const mesSeleccionado = document.getElementById('mes').value;
 
-    if (!mesSeleccionado) {
-        alert('Por favor, seleccione un mes para descargar.');
-        return;
-    }
-
-    const [anio, mes] = mesSeleccionado.split('-');
-    const apiUrl = tipo === 'boleta' 
-        ? `/api/trabajos/excel-boleta?anio=${anio}&mes=${mes}`
-        : `/api/trabajos/excel?anio=${anio}&mes=${mes}`;
-
-    try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-            throw new Error('Error al descargar el archivo Excel');
+        if (!mesSeleccionado) {
+            alert('Por favor, seleccione un mes para descargar.');
+            return;
         }
-        const blob = await response.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = downloadUrl;
-        a.download = tipo === 'boleta' 
-            ? `boletas-${anio}-${mes}.xlsx`
-            : `trabajos-${anio}-${mes}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(downloadUrl);
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Ocurrió un error al descargar el archivo Excel. Por favor, intente de nuevo.');
+
+        const [anio, mes] = mesSeleccionado.split('-');
+        const apiUrl = tipo === 'boleta'
+            ? `/api/trabajos/excel-boleta?anio=${anio}&mes=${mes}`
+            : `/api/trabajos/excel?anio=${anio}&mes=${mes}`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                headers: {
+                    'x-auth-token': getToken()
+                }
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                throw new Error('Error al descargar el archivo Excel');
+            }
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = downloadUrl;
+            a.download = tipo === 'boleta'
+                ? `boletas-${anio}-${mes}.xlsx`
+                : `trabajos-${anio}-${mes}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Ocurrió un error al descargar el archivo Excel. Por favor, intente de nuevo.');
+        }
     }
-}
 };
+
+
+function getToken() {
+    return localStorage.getItem('token');
+}
+
+
 
 /**
  * Actualiza el valor formateado para viático y estacionamiento
@@ -391,17 +473,26 @@ function formatearValorMoneda(valor) {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(valor);
 }
 
+
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+}
+
 /**
  * Inicializa la página cuando el DOM está completamente cargado
  */
 function initializePage() {
+    checkAuth();
     const fechaActual = new Date();
     const mesActual = fechaActual.toISOString().slice(0, 7); // Formato YYYY-MM
     document.getElementById('mes').value = mesActual;
 
     TrabajoManager.cargarTrabajos(); // Cargará los trabajos del mes actual por defecto
     ClienteManager.cargarCiudades();
-   
+
     // Configurar event listeners para elementos del DOM
     DOM.formularioTrabajo.addEventListener('submit', TrabajoManager.agregarTrabajo.bind(TrabajoManager));
     DOM.formularioFiltro.addEventListener('submit', FiltroManager.filtrarTrabajos);

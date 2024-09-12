@@ -1,3 +1,7 @@
+function getToken() {
+    return localStorage.getItem('token');
+}
+
 /**
  * Variable global para mantener la referencia al gráfico de ganancias
  */
@@ -33,8 +37,22 @@ function llenarSelectorAño() {
 function cargarGraficoIngresos() {
     const año = document.getElementById('añoGanancias').value || new Date().getFullYear();
 
-    fetch(`/api/ganancias?año=${año}`)
-        .then(response => response.json())
+    fetch(`/api/ganancias?año=${año}`, {
+        headers: {
+            'x-auth-token': getToken()
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                throw new Error('Error al cargar las ganancias');
+            }
+            return response.json();
+        })
         .then(ganancias => {
             const ctx = document.getElementById('graficoIngresos').getContext('2d');
             const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -64,7 +82,7 @@ function cargarGraficoIngresos() {
                         },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     return formatearMoneda(context.raw);
                                 }
                             }
@@ -74,7 +92,7 @@ function cargarGraficoIngresos() {
                         x: {
                             beginAtZero: true,
                             ticks: {
-                                callback: function(value) {
+                                callback: function (value) {
                                     return formatearMoneda(value, true);
                                 }
                             }
@@ -136,8 +154,22 @@ function cargarListaTrabajos(anio, mes) {
 
     const url = `/api/trabajos?anio=${anio}&mes=${mes}`;
 
-    fetch(url)
-        .then(response => response.json())
+    fetch(url, {
+        headers: {
+            'x-auth-token': getToken()
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                throw new Error('Error al cargar los trabajos');
+            }
+            return response.json();
+        })
         .then(trabajos => {
             const tbody = document.getElementById('cuerpoTablaTrabajosListado');
             tbody.innerHTML = '';
@@ -166,6 +198,14 @@ function cargarListaTrabajos(anio, mes) {
         .catch(error => console.error('Error al cargar los trabajos:', error));
 }
 
+
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+}
+
 /**
  * Filtra los trabajos por el mes seleccionado
  * @param {Event} event - Evento del formulario
@@ -187,17 +227,24 @@ function filtrarTrabajos(event) {
  * Inicializa la página cuando el DOM está completamente cargado
  */
 document.addEventListener('DOMContentLoaded', function () {
+    checkAuth();
     llenarSelectorAño();
     cargarGraficoIngresos();
-    
+
     // Establecer el mes actual en el selector de mes
     const fechaActual = new Date();
     const mesActual = fechaActual.toISOString().slice(0, 7); // Formato YYYY-MM
     document.getElementById('mes').value = mesActual;
-    
+
     cargarListaTrabajos(); // Cargará los trabajos del mes actual por defecto
     document.getElementById('formularioFiltro').addEventListener('submit', filtrarTrabajos);
     document.getElementById('añoGanancias').addEventListener('change', cargarGraficoIngresos);
+
+    document.getElementById('logoutButton').addEventListener('click', function () {
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+    });
+
 });
 
 

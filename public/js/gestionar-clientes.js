@@ -1,3 +1,8 @@
+
+function getToken() {
+    return localStorage.getItem('token');
+}
+
 // Objeto para almacenar referencias a elementos del DOM
 const DOM = {
     formularioCliente: document.getElementById('formularioCliente'),
@@ -19,8 +24,19 @@ const ClienteManager = {
      */
     async cargarClientes() {
         try {
-            const response = await fetch('/api/clientes');
-            if (!response.ok) throw new Error('Error al cargar los clientes');
+            const response = await fetch('/api/clientes', {
+                headers: {
+                    'x-auth-token': getToken()
+                }
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                throw new Error('Error al cargar los clientes');
+            }
             const clientes = await response.json();
             this.renderizarTablaClientes(clientes);
         } catch (error) {
@@ -74,10 +90,20 @@ const ClienteManager = {
         try {
             const response = await fetch('/api/clientes', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': getToken()
+                },
                 body: JSON.stringify(clienteData),
             });
-            if (!response.ok) throw new Error('Error al agregar el cliente');
+            if (!response.ok) {
+                if (response.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                throw new Error('Error al agregar el cliente');
+            }
             const data = await response.json();
             console.log('Cliente agregado:', data);
             this.cargarClientes();
@@ -94,8 +120,20 @@ const ClienteManager = {
      */
     async editarCliente(id) {
         try {
-            const response = await fetch(`/api/clientes/${id}`);
-            if (!response.ok) throw new Error('Error al cargar los datos del cliente');
+            const response = await fetch(`/api/clientes/${id}`, {
+                headers: {
+                    'x-auth-token': getToken()
+                }
+            });
+            if (!response.ok) {
+                if (response.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                throw new Error('Error al cargar los datos del cliente');
+            }
             const cliente = await response.json();
             if (!cliente) throw new Error('Cliente no encontrado');
 
@@ -148,10 +186,20 @@ const ClienteManager = {
         try {
             const response = await fetch(`/api/clientes/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': getToken()
+                },
                 body: JSON.stringify(clienteData),
             });
-            if (!response.ok) throw new Error('Error al actualizar el cliente');
+            if (!response.ok) {
+                if (response.status === 401) {
+                    alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                throw new Error('Error al actualizar el cliente');
+            }
             const data = await response.json();
             console.log('Cliente actualizado:', data);
             this.cargarClientes();
@@ -169,8 +217,20 @@ const ClienteManager = {
     async eliminarCliente(id) {
         if (confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
             try {
-                const response = await fetch(`/api/clientes/${id}`, { method: 'DELETE' });
-                if (!response.ok) throw new Error('Error al eliminar el cliente');
+                const response = await fetch(`/api/clientes/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'x-auth-token': getToken()
+                    }
+                });
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        alert('Sesión expirada. Por favor, inicie sesión nuevamente.');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    throw new Error('Error al eliminar el cliente');
+                }
                 const data = await response.json();
                 console.log('Cliente eliminado:', data);
                 this.cargarClientes();
@@ -247,10 +307,19 @@ function actualizarValorFormateado(event) {
     valorFormateado.textContent = formatearValorMoneda(valor);
 }
 
+
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+}
+
 /**
  * Inicializa la página cuando el DOM está completamente cargado
  */
 function initializePage() {
+    checkAuth();
     ClienteManager.cargarClientes();
     DOM.formularioCliente.addEventListener('submit', ClienteManager.agregarCliente.bind(ClienteManager));
     DOM.formularioEditarCliente.addEventListener('submit', ClienteManager.actualizarCliente.bind(ClienteManager));
