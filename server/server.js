@@ -3,7 +3,11 @@ const { ObjectId } = require('mongodb');
 const path = require('path');
 const { conectarDB } = require('./db');
 const Excel = require('exceljs');
+const authRoutes = require('./auth');
+const authMiddleware = require('./authMiddleware');
+const adminRoutes = require('./admin');
 require('dotenv').config();
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -11,6 +15,9 @@ const port = process.env.PORT || 3000;
 // Configuración de middleware
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+
 
 // Función de utilidad para manejar errores
 const handleError = (res, error) => {
@@ -18,10 +25,29 @@ const handleError = (res, error) => {
     res.status(500).json({ error: error.message || 'Error interno del servidor' });
 };
 
+
+// Ruta protegida para admin.html
+app.get('/admin', authMiddleware, async (req, res) => {
+    try {
+        const db = await conectarDB();
+        const users = db.collection('users');
+        const user = await users.findOne({ _id: new ObjectId(req.user.id) });
+
+        if (!user || !user.isAdmin) {
+            return res.status(403).sendFile(path.join(__dirname, '../public', 'unauthorized.html'));
+        }
+
+        res.sendFile(path.join(__dirname, '../public', 'admin.html'));
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 /**
  * Obtiene todas las ciudades únicas
  */
-app.get('/api/ciudades', async (req, res) => {
+app.get('/api/ciudades', authMiddleware, async (req, res) => {
     try {
         const db = await conectarDB();
         const clientes = db.collection('clientes');
@@ -35,7 +61,7 @@ app.get('/api/ciudades', async (req, res) => {
 /**
  * Rutas para clientes
  */
-app.get('/api/clientes', async (req, res) => {
+app.get('/api/clientes', authMiddleware, async (req, res) => {
     try {
         const db = await conectarDB();
         const clientes = db.collection('clientes');
@@ -47,7 +73,7 @@ app.get('/api/clientes', async (req, res) => {
     }
 });
 
-app.post('/api/clientes', async (req, res) => {
+app.post('/api/clientes', authMiddleware, async (req, res) => {
     try {
         const db = await conectarDB();
         const clientes = db.collection('clientes');
@@ -58,12 +84,12 @@ app.post('/api/clientes', async (req, res) => {
     }
 });
 
-app.put('/api/clientes/:id', async (req, res) => {
+app.put('/api/clientes/:id', authMiddleware, async (req, res) => {
     try {
         const db = await conectarDB();
         const clientes = db.collection('clientes');
         const id = req.params.id;
-        
+
         const updateData = {};
         if (req.body.viatico !== undefined) updateData.viatico = req.body.viatico;
         if (req.body.estacionamiento !== undefined) updateData.estacionamiento = req.body.estacionamiento;
@@ -72,7 +98,7 @@ app.put('/api/clientes/:id', async (req, res) => {
             { _id: new ObjectId(id) },
             { $set: updateData }
         );
-        
+
         if (resultado.matchedCount === 0) {
             return res.status(404).json({ error: 'Cliente no encontrado' });
         }
@@ -82,13 +108,13 @@ app.put('/api/clientes/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/clientes/:id', async (req, res) => {
+app.delete('/api/clientes/:id', authMiddleware, async (req, res) => {
     try {
         const db = await conectarDB();
         const clientes = db.collection('clientes');
         const id = req.params.id;
         const resultado = await clientes.deleteOne({ _id: new ObjectId(id) });
-        
+
         if (resultado.deletedCount === 0) {
             return res.status(404).json({ error: 'Cliente no encontrado' });
         }
@@ -98,7 +124,7 @@ app.delete('/api/clientes/:id', async (req, res) => {
     }
 });
 
-app.get('/api/clientes/:id', async (req, res) => {
+app.get('/api/clientes/:id', authMiddleware, async (req, res) => {
     try {
         const db = await conectarDB();
         const clientes = db.collection('clientes');
@@ -116,7 +142,7 @@ app.get('/api/clientes/:id', async (req, res) => {
 /**
  * Rutas para trabajos
  */
-app.get('/api/trabajos', async (req, res) => {
+app.get('/api/trabajos', authMiddleware, async (req, res) => {
     try {
         const db = await conectarDB();
         const trabajos = db.collection('trabajos');
@@ -151,7 +177,7 @@ app.get('/api/trabajos', async (req, res) => {
     }
 });
 
-app.post('/api/trabajos', async (req, res) => {
+app.post('/api/trabajos', authMiddleware, async (req, res) => {
     try {
         const db = await conectarDB();
         const trabajos = db.collection('trabajos');
@@ -180,13 +206,13 @@ app.post('/api/trabajos', async (req, res) => {
     }
 });
 
-app.delete('/api/trabajos/:id', async (req, res) => {
+app.delete('/api/trabajos/:id', authMiddleware, async (req, res) => {
     try {
         const db = await conectarDB();
         const trabajos = db.collection('trabajos');
         const id = req.params.id;
         const resultado = await trabajos.deleteOne({ _id: new ObjectId(id) });
-        
+
         if (resultado.deletedCount === 0) {
             return res.status(404).json({ error: 'Trabajo no encontrado' });
         }
@@ -199,7 +225,7 @@ app.delete('/api/trabajos/:id', async (req, res) => {
 /**
  * Ruta para obtener ganancias
  */
-app.get('/api/ganancias', async (req, res) => {
+app.get('/api/ganancias', authMiddleware, async (req, res) => {
     try {
         const db = await conectarDB();
         const trabajos = db.collection('trabajos');
@@ -240,7 +266,7 @@ app.get('/api/ganancias', async (req, res) => {
 /**
  * Endpoint para generar Excel
  */
-app.get('/api/trabajos/excel', async (req, res) => {
+app.get('/api/trabajos/excel', authMiddleware, async (req, res) => {
     try {
         const { anio, mes } = req.query;
         const db = await conectarDB();
@@ -294,7 +320,7 @@ app.get('/api/trabajos/excel', async (req, res) => {
     }
 });
 
-app.get('/api/trabajos/excel-boleta', async (req, res) => {
+app.get('/api/trabajos/excel-boleta', authMiddleware, async (req, res) => {
     try {
         const { anio, mes } = req.query;
         const db = await conectarDB();
@@ -332,7 +358,7 @@ app.get('/api/trabajos/excel-boleta', async (req, res) => {
             const [anio, mes, dia] = trabajo.fecha.split('-');
             const fechaFormateada = `${dia}/${mes}`; // Formato corregido: día/mes
             const esMantenimieto = trabajo.tipo.toUpperCase() === 'MANTENIMIENTO';
-            
+
             const valorBruto = trabajo.valor;
             const valorConImpuesto = valorBruto / 0.8625; // Aplicar la retención del 13.75%
 

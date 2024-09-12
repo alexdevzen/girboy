@@ -5,7 +5,7 @@
   --background-color: #f8f9fa;
   --text-color: #333;
   --border-radius: 4px;
-  --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   --input-background: #e8f0fe;
   --input-border: #bbd1ea;
 }
@@ -61,7 +61,7 @@ main {
 }
 
 .sidebar a:hover {
-  background-color: rgba(255,255,255,0.1);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Cards */
@@ -98,7 +98,9 @@ label {
   font-size: 0.9rem;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   width: 100%;
   padding: 0.5rem;
   border: 1px solid var(--input-border);
@@ -119,17 +121,23 @@ select {
   padding-right: 2rem;
 }
 
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.25);
 }
 
 textarea {
-  resize: none; /* Evita que el usuario pueda redimensionar */
-  height: 50px; /* Altura fija de 100px, ajusta según tus necesidades */
-  min-height: auto; /* Elimina la altura mínima */
-  overflow-y: auto; /* Permite desplazamiento vertical si el contenido excede la altura */
+  resize: none;
+  /* Evita que el usuario pueda redimensionar */
+  height: 50px;
+  /* Altura fija de 100px, ajusta según tus necesidades */
+  min-height: auto;
+  /* Elimina la altura mínima */
+  overflow-y: auto;
+  /* Permite desplazamiento vertical si el contenido excede la altura */
 }
 
 button {
@@ -157,12 +165,14 @@ button:hover {
 .table-responsive table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9em; /* Reduce el tamaño de la fuente */
+  font-size: 0.9em;
+  /* Reduce el tamaño de la fuente */
 }
 
 .table-responsive th,
 .table-responsive td {
-  padding: 8px 10px; /* Reduce el padding */
+  padding: 8px 10px;
+  /* Reduce el padding */
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
@@ -188,7 +198,8 @@ button:hover {
 
 .table-responsive td[data-label="Nombre"],
 .table-responsive td[data-label="Dirección"] {
-  max-width: 150px; /* Ajusta según necesites */
+  max-width: 150px;
+  /* Ajusta según necesites */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -212,43 +223,43 @@ button:hover {
 /* Responsive design */
 @media screen and (max-width: 768px) {
   .table-responsive thead {
-      display: none;
+    display: none;
   }
-  
-  .table-responsive, 
-  .table-responsive tbody, 
-  .table-responsive tr, 
+
+  .table-responsive,
+  .table-responsive tbody,
+  .table-responsive tr,
   .table-responsive td {
-      display: block;
-      width: 100%;
+    display: block;
+    width: 100%;
   }
-  
+
   .table-responsive tr {
-      margin-bottom: 15px;
-      border: 1px solid #ddd;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
   }
-  
+
   .table-responsive td {
-      text-align: right;
-      padding-left: 50%;
-      position: relative;
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
   }
-  
+
   .table-responsive td::before {
-      content: attr(data-label);
-      position: absolute;
-      left: 6px;
-      width: 45%;
-      padding-right: 10px;
-      white-space: nowrap;
-      text-align: left;
-      font-weight: bold;
+    content: attr(data-label);
+    position: absolute;
+    left: 6px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
   }
 
   .table-responsive td[data-label="Nombre"],
   .table-responsive td[data-label="Dirección"] {
-      max-width: none;
-      white-space: normal;
+    max-width: none;
+    white-space: normal;
   }
 }
 
@@ -285,7 +296,7 @@ h1 {
   gap: 1rem;
   max-width: 50%;
   margin: 0 auto;
-  
+
 }
 
 #formularioFiltro .form-group {
@@ -327,7 +338,8 @@ h1 {
 
 #formularioFiltro .form-group {
   flex: 1;
-  max-width: calc(100% - 110px); /* Ajusta este valor según el ancho del botón filtrar */
+  max-width: calc(100% - 110px);
+  /* Ajusta este valor según el ancho del botón filtrar */
 }
 
 #formularioFiltro label {
@@ -357,7 +369,8 @@ h1 {
 /* Mantén los colores originales de los botones aquí */
 
 #formularioFiltro button[type="submit"] {
-  margin-left: auto; /* Alinea el botón filtrar a la derecha */
+  margin-left: auto;
+  /* Alinea el botón filtrar a la derecha */
 }
 
 .excel-buttons {
@@ -378,12 +391,14 @@ h1 {
 #cuerpoTablaTrabajos {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9em; /* Reduce el tamaño de la fuente */
+  font-size: 0.9em;
+  /* Reduce el tamaño de la fuente */
 }
 
 #cuerpoTablaTrabajos th,
 #cuerpoTablaTrabajos td {
-  padding: 8px 10px; /* Reduce el padding */
+  padding: 8px 10px;
+  /* Reduce el padding */
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
@@ -408,7 +423,8 @@ h1 {
 }
 
 #cuerpoTablaTrabajos td[data-label="Descripción"] {
-  max-width: 200px; /* Ajusta según necesites */
+  max-width: 200px;
+  /* Ajusta según necesites */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -423,37 +439,37 @@ h1 {
 /* Responsive design */
 @media screen and (max-width: 600px) {
   #cuerpoTablaTrabajos thead {
-      display: none;
+    display: none;
   }
-  
-  #cuerpoTablaTrabajos, 
-  #cuerpoTablaTrabajos tbody, 
-  #cuerpoTablaTrabajos tr, 
+
+  #cuerpoTablaTrabajos,
+  #cuerpoTablaTrabajos tbody,
+  #cuerpoTablaTrabajos tr,
   #cuerpoTablaTrabajos td {
-      display: block;
-      width: 100%;
+    display: block;
+    width: 100%;
   }
-  
+
   #cuerpoTablaTrabajos tr {
-      margin-bottom: 15px;
-      border: 1px solid #ddd;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
   }
-  
+
   #cuerpoTablaTrabajos td {
-      text-align: right;
-      padding-left: 50%;
-      position: relative;
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
   }
-  
+
   #cuerpoTablaTrabajos td::before {
-      content: attr(data-label);
-      position: absolute;
-      left: 6px;
-      width: 45%;
-      padding-right: 10px;
-      white-space: nowrap;
-      text-align: left;
-      font-weight: bold;
+    content: attr(data-label);
+    position: absolute;
+    left: 6px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
   }
 }
 
@@ -463,22 +479,23 @@ h1 {
   .container {
     flex-direction: column;
   }
-  
+
   .sidebar {
     width: 100%;
     padding: 0.5rem;
   }
-  
+
   .sidebar ul {
     display: flex;
     justify-content: space-around;
   }
-  
+
   .sidebar li {
     margin-bottom: 0;
   }
 
-  form, #formularioFiltro {
+  form,
+  #formularioFiltro {
     max-width: 100%;
   }
 }
@@ -495,4 +512,58 @@ dialog {
 
 dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.5);
+}
+
+
+/* Estilos para la página de inicio de sesión y registro */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--background-color);
+}
+
+.auth-card {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-card h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--secondary-color);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.auth-form button {
+  align-self: center;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.auth-switch a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
 }
