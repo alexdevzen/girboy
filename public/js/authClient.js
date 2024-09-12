@@ -18,6 +18,8 @@ async function handleLogin(event) {
         if (response.ok) {
             localStorage.setItem('token', data.token);
             window.location.href = 'index.html';
+        } else if (response.status === 403) {
+            alert('Tu cuenta está pendiente de aprobación. Por favor, espera a que un administrador la apruebe.');
         } else {
             alert(data.msg || 'Error en el inicio de sesión');
         }

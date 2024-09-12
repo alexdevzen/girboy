@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="agregar-trabajos.html">Agregar Trabajos</a></li>
+                <li><a href="gestionar-clientes.html">Gestionar Clientes</a></li>
+                <li><a href="#" id="logoutButton">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+        <main role="main">
+            <h1>Panel de Administración</h1>
+            <section class="section card">
+                <h2>Usuarios Pendientes de Aprobación</h2>
+                <div class="table-responsive">
+                    <table id="pendingUsersTable">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Email</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="./js/admin.js"></script>
+</body>
+
+</html>

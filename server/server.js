@@ -5,6 +5,7 @@ const { conectarDB } = require('./db');
 const Excel = require('exceljs');
 const authRoutes = require('./auth');
 const authMiddleware = require('./authMiddleware');
+const adminRoutes = require('./admin');
 require('dotenv').config();
 
 
@@ -15,12 +16,33 @@ const port = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json());
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+
 
 // Función de utilidad para manejar errores
 const handleError = (res, error) => {
     console.error('Error:', error);
     res.status(500).json({ error: error.message || 'Error interno del servidor' });
 };
+
+
+// Ruta protegida para admin.html
+app.get('/admin', authMiddleware, async (req, res) => {
+    try {
+        const db = await conectarDB();
+        const users = db.collection('users');
+        const user = await users.findOne({ _id: new ObjectId(req.user.id) });
+
+        if (!user || !user.isAdmin) {
+            return res.status(403).sendFile(path.join(__dirname, '../public', 'unauthorized.html'));
+        }
+
+        res.sendFile(path.join(__dirname, '../public', 'admin.html'));
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
 
 /**
  * Obtiene todas las ciudades únicas

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Administrador</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h2>Crear Administrador</h2>
+            <form id="createAdminForm" class="auth-form">
+                <div class="form-group">
+                    <label for="username">Nombre de Usuario</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="secretCode">Código Secreto</label>
+                    <input type="password" id="secretCode" required>
+                </div>
+                <button type="submit">Crear Administrador</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('createAdminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const secretCode = document.getElementById('secretCode').value;
+
+            try {
+                const response = await fetch('/api/auth/create-admin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, email, password, secretCode }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Administrador creado con éxito');
+                    window.location.href = 'login.html';
+                } else {
+                    alert(data.msg || 'Error al crear el administrador');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al crear el administrador');
+            }
+        });
+    </script>
+</body>
+
+</html>
