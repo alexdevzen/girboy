@@ -360,7 +360,7 @@ app.get('/api/trabajos/excel-boleta', authMiddleware, async (req, res) => {
             const esMantenimieto = trabajo.tipo.toUpperCase() === 'MANTENIMIENTO';
 
             const valorBruto = trabajo.valor;
-            const valorConImpuesto = valorBruto / 0.8625; // Aplicar la retención del 13.75%
+            const valorConImpuesto = valorBruto / 0.855; // Aplicar la retención del 14.5% (antes 13.75%)
 
             worksheet.addRow({
                 fecha: fechaFormateada,
@@ -375,7 +375,7 @@ app.get('/api/trabajos/excel-boleta', authMiddleware, async (req, res) => {
         }
 
         // Agregar fila para viáticos y estacionamiento
-        const totalViaticosYEstacionamientoConImpuesto = totalViaticosYEstacionamiento / 0.8625;
+        const totalViaticosYEstacionamientoConImpuesto = totalViaticosYEstacionamiento / 0.855;
         worksheet.addRow({
             fecha: '',
             codigo: 'VIATICOS Y ESTACIONAMIENTO',
