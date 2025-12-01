@@ -6,8 +6,9 @@ const uri = process.env.MONGODB_URI;
 
 // Opciones de conexión para el cliente de MongoDB
 const options = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+autoSelectFamily: false
+//    useNewUrlParser: true,
+//    useUnifiedTopology: true,
     // Añadir más opciones según sea necesario
 };
 
